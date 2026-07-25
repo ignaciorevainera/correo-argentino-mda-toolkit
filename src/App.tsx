@@ -24,32 +24,28 @@ function App() {
         <div className="max-w-xl mx-auto p-3 flex flex-col gap-3">
           <DiagnosticCard
             title="Ping"
-            commandName="run_ping"
-            commandArgs={{ hostname }}
+            command={`ping -n 4 ${hostname}`}
             hostname={hostname}
             executeTrigger={runAllTrigger}
           />
 
           <DiagnosticCard
             title="Net Time"
-            commandName="run_net_time"
-            commandArgs={{ hostname }}
+            command={`net time \\\\${hostname}`}
             hostname={hostname}
             executeTrigger={runAllTrigger}
           />
 
           <DiagnosticCard
             title="Nslookup"
-            commandName="run_nslookup"
-            commandArgs={{ hostname }}
+            command={`nslookup ${hostname}`}
             hostname={hostname}
             executeTrigger={runAllTrigger}
           />
 
           <DiagnosticCard
             title="Net User"
-            commandName="run_net_user"
-            commandArgs={{ username: netUserUsername }}
+            command={`net user ${netUserUsername} /domain`}
             hostname={hostname}
             executeTrigger={runAllTrigger}
             extraInput={{

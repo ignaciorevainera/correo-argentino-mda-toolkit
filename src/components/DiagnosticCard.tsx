@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { useClipboard } from "../hooks/useClipboard";
-import type { CommandResult } from "../types";
+import type { StreamLinePayload, StreamDonePayload } from "../types";
 
 interface DiagnosticCardProps {
   title: string;
-  commandName: string;
-  commandArgs: Record<string, string>;
+  command: string;
   hostname: string;
   executeTrigger: number;
   disabled?: boolean;
@@ -19,20 +19,21 @@ interface DiagnosticCardProps {
   };
 }
 
-function OutputBlock({ result }: { result: CommandResult }) {
+function OutputBlock({ lines, exitCode }: { lines: string[]; exitCode: number | null }) {
   const { copied, copy } = useClipboard();
-  const hasOutput = result.stdout.trim() || result.stderr.trim();
-  const outputText = [result.stdout, result.stderr]
-    .filter(Boolean)
-    .join("\n");
+  const outputText = lines.join("\n");
+  const hasOutput = lines.length > 0;
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [lines.length]);
 
   return (
     <div className="border border-base-300 overflow-hidden rounded">
       <div className="flex items-center justify-between px-2 py-1 bg-base-300/30 border-b border-base-300">
-        <span className={`badge badge-xs ${
-          result.exit_code === 0 ? "badge-outline" : "badge-error"
-        }`}>
-          {result.exit_code !== null ? `exit ${result.exit_code}` : "error"}
+        <span className={`badge badge-xs ${exitCode === null ? "badge-warning" : exitCode === 0 ? "badge-outline" : "badge-error"}`}>
+          {exitCode !== null ? `exit ${exitCode}` : "en curso"}
         </span>
         <button
           onClick={() => copy(outputText)}
@@ -45,6 +46,7 @@ function OutputBlock({ result }: { result: CommandResult }) {
       </div>
       <pre className="p-2 text-xs font-mono text-base-content/80 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto leading-relaxed">
         {hasOutput ? outputText : <span className="text-base-content/30 italic">Sin salida</span>}
+        <div ref={bottomRef} />
       </pre>
     </div>
   );
@@ -52,34 +54,63 @@ function OutputBlock({ result }: { result: CommandResult }) {
 
 export default function DiagnosticCard({
   title,
-  commandName,
-  commandArgs,
+  command,
   hostname,
   executeTrigger,
   disabled,
   extraInput,
 }: DiagnosticCardProps) {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CommandResult | null>(null);
+  const [lines, setLines] = useState<string[]>([]);
+  const [exitCode, setExitCode] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const triggerRef = useRef(executeTrigger);
+  const abortRef = useRef(false);
 
   const isDisabled = disabled || !hostname.trim();
 
-  const execute = async () => {
+  const execute = useCallback(async () => {
     if (loading) return;
+    abortRef.current = false;
     setLoading(true);
     setError(null);
-    setResult(null);
+    setLines([]);
+    setExitCode(null);
+
+    const runId = `${title}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+    const unlistenLine = await listen<StreamLinePayload>("command-line", (event) => {
+      if (event.payload.id === runId && !abortRef.current) {
+        setLines((prev) => [...prev, event.payload.text]);
+      }
+    });
+
+    const unlistenDone = await listen<StreamDonePayload>("command-done", (event) => {
+      if (event.payload.id === runId && !abortRef.current) {
+        setExitCode(event.payload.exit_code);
+        setLoading(false);
+        unlistenLine();
+        unlistenDone();
+      }
+    });
+
     try {
-      const data = await invoke<CommandResult>(commandName, commandArgs);
-      setResult(data);
+      await invoke("run_command_stream", { id: runId, command });
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
+      if (!abortRef.current) {
+        setError(err instanceof Error ? err.message : String(err));
+        setLoading(false);
+        unlistenLine();
+        unlistenDone();
+      }
     }
-  };
+  }, [command, loading, title]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (executeTrigger !== 0 && executeTrigger !== triggerRef.current) {
@@ -88,7 +119,7 @@ export default function DiagnosticCard({
         execute();
       }
     }
-  }, [executeTrigger]);
+  }, [executeTrigger, execute, isDisabled]);
 
   return (
     <div className="bg-base-100 border border-base-300 p-3 flex flex-col gap-2 rounded">
@@ -139,9 +170,11 @@ export default function DiagnosticCard({
         </div>
       )}
 
-      {result && <OutputBlock result={result} />}
+      {(lines.length > 0 || exitCode !== null) && (
+        <OutputBlock lines={lines} exitCode={exitCode} />
+      )}
 
-      {!result && !loading && !error && (
+      {lines.length === 0 && !loading && !error && exitCode === null && (
         <div className="text-xs text-base-content/30 italic py-4 text-center">
           Presione Ejecutar
         </div>

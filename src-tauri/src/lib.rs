@@ -1,92 +1,116 @@
 use encoding_rs::WINDOWS_1252;
 use serde::Serialize;
 use std::process::Command as StdCommand;
-use std::sync::Mutex;
-use tauri::State;
+use tauri::Emitter;
+use tokio::io::{AsyncBufReadExt, BufReader};
+use tokio::process::Command;
 
 #[derive(Debug, Serialize, Clone)]
-pub struct CommandResult {
-    pub command: String,
-    pub stdout: String,
-    pub stderr: String,
-    pub exit_code: Option<i32>,
+pub struct StreamLinePayload {
+    pub id: String,
+    pub text: String,
 }
 
-struct AppState {
-    running: Mutex<bool>,
+#[derive(Debug, Serialize, Clone)]
+pub struct StreamDonePayload {
+    pub id: String,
+    pub exit_code: Option<i32>,
 }
 
 fn decode_windows_output(bytes: Vec<u8>) -> String {
     if bytes.is_empty() {
         return String::new();
     }
-    match String::from_utf8(bytes.clone()) {
+    match String::from_utf8(bytes) {
         Ok(s) => s,
-        Err(_) => {
-            let (decoded, _, _) = WINDOWS_1252.decode(&bytes);
+        Err(e) => {
+            let (decoded, _, _) = WINDOWS_1252.decode(e.as_bytes());
             decoded.into_owned()
         }
     }
 }
 
-fn run_single_command(command: &str) -> CommandResult {
-    let output = StdCommand::new("cmd")
-        .args(["/c", command])
-        .output();
-
-    match output {
-        Ok(out) => CommandResult {
-            command: command.to_string(),
-            stdout: decode_windows_output(out.stdout),
-            stderr: decode_windows_output(out.stderr),
-            exit_code: out.status.code(),
-        },
-        Err(e) => CommandResult {
-            command: command.to_string(),
-            stdout: String::new(),
-            stderr: format!("Failed to execute: {}", e),
-            exit_code: None,
-        },
-    }
-}
-
-#[tauri::command]
-fn execute_diagnostic(
-    hostname: String,
-    state: State<'_, AppState>,
-) -> Result<Vec<CommandResult>, String> {
-    {
-        let mut running = state.running.lock().map_err(|e| e.to_string())?;
-        if *running {
-            return Err("A diagnostic run is already in progress.".to_string());
+async fn stream_output<R: tokio::io::AsyncRead + Unpin>(
+    mut reader: BufReader<R>,
+    window: tauri::Window,
+    id: String,
+) {
+    let mut buffer = Vec::new();
+    loop {
+        match reader.read_until(b'\n', &mut buffer).await {
+            Ok(0) => break,
+            Ok(_) => {
+                if buffer.ends_with(b"\n") {
+                    buffer.pop();
+                    if buffer.ends_with(b"\r") {
+                        buffer.pop();
+                    }
+                }
+                let text = decode_windows_output(std::mem::take(&mut buffer));
+                let _ = window.emit(
+                    "command-line",
+                    StreamLinePayload {
+                        id: id.clone(),
+                        text,
+                    },
+                );
+            }
+            Err(_) => break,
         }
-        *running = true;
     }
-
-    let commands = vec![
-        format!("ping -n 4 {}", hostname),
-        format!("net time \\\\{}", hostname),
-        format!("nslookup {}", hostname),
-    ];
-
-    let results: Vec<CommandResult> = commands
-        .iter()
-        .map(|cmd| run_single_command(cmd))
-        .collect();
-
-    {
-        let mut running = state.running.lock().map_err(|e| e.to_string())?;
-        *running = false;
-    }
-
-    Ok(results)
 }
 
 #[tauri::command]
-fn run_net_user(username: String, _state: State<'_, AppState>) -> Result<CommandResult, String> {
-    let command = format!("net user {}", username);
-    let result = run_single_command(&command);
-    Ok(result)
+async fn run_command_stream(
+    window: tauri::Window,
+    id: String,
+    command: String,
+) -> Result<(), String> {
+    let mut child = Command::new("cmd")
+        .args(["/c", &command])
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to spawn: {}", e))?;
+
+    let stdout = child
+        .stdout
+        .take()
+        .ok_or_else(|| "No stdout".to_string())?;
+    let stderr = child
+        .stderr
+        .take()
+        .ok_or_else(|| "No stderr".to_string())?;
+
+    let win_stdout = window.clone();
+    let id_stdout = id.clone();
+    let stdout_handle = tokio::spawn(async move {
+        stream_output(BufReader::new(stdout), win_stdout, id_stdout).await;
+    });
+
+    let win_stderr = window.clone();
+    let id_stderr = id.clone();
+    let stderr_handle = tokio::spawn(async move {
+        stream_output(BufReader::new(stderr), win_stderr, id_stderr).await;
+    });
+
+    let _ = stdout_handle.await;
+    let _ = stderr_handle.await;
+
+    let status = child
+        .wait()
+        .await
+        .map_err(|e| format!("Wait error: {}", e))?;
+
+    let _ = window.emit(
+        "command-done",
+        StreamDonePayload {
+            id,
+            exit_code: status.code(),
+        },
+    );
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -98,42 +122,11 @@ fn run_msra_offer(hostname: String) -> Result<(), String> {
     Ok(())
 }
 
-#[tauri::command]
-fn run_ping(hostname: String) -> Result<CommandResult, String> {
-    let command = format!("ping -n 4 {}", hostname);
-    let result = run_single_command(&command);
-    Ok(result)
-}
-
-#[tauri::command]
-fn run_net_time(hostname: String) -> Result<CommandResult, String> {
-    let command = format!("net time \\\\{}", hostname);
-    let result = run_single_command(&command);
-    Ok(result)
-}
-
-#[tauri::command]
-fn run_nslookup(hostname: String) -> Result<CommandResult, String> {
-    let command = format!("nslookup {}", hostname);
-    let result = run_single_command(&command);
-    Ok(result)
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(AppState {
-            running: Mutex::new(false),
-        })
-        .invoke_handler(tauri::generate_handler![
-            execute_diagnostic,
-            run_net_user,
-            run_msra_offer,
-            run_ping,
-            run_net_time,
-            run_nslookup,
-        ])
+        .invoke_handler(tauri::generate_handler![run_command_stream, run_msra_offer])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

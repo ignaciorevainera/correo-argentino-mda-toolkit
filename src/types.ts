@@ -1,6 +1,9 @@
-export interface CommandResult {
-  command: string;
-  stdout: string;
-  stderr: string;
+export interface StreamLinePayload {
+  id: string;
+  text: string;
+}
+
+export interface StreamDonePayload {
+  id: string;
   exit_code: number | null;
 }
