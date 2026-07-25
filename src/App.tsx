@@ -2,15 +2,18 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import Layout from "./components/Layout";
 import DiagnosticForm, { type DiagnosticInput } from "./components/DiagnosticForm";
+import ActionButtons from "./components/ActionButtons";
 import OutputPanel from "./components/OutputPanel";
 import type { CommandResult } from "./types";
 
 function App() {
   const [loading, setLoading] = useState(false);
+  const [lastHostname, setLastHostname] = useState("");
   const [results, setResults] = useState<CommandResult[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const handleDiagnostic = async (input: DiagnosticInput) => {
+    setLastHostname(input.hostname);
     setLoading(true);
     setError(null);
     setResults([]);
@@ -45,6 +48,10 @@ function App() {
         </div>
 
         <DiagnosticForm onSubmit={handleDiagnostic} disabled={loading} />
+
+        {lastHostname && (
+          <ActionButtons hostname={lastHostname} disabled={loading} />
+        )}
 
         {error && (
           <div role="alert" className="alert alert-error">
