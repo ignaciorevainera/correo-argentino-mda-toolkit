@@ -7,21 +7,65 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+.pnp
+.pnp.js
+
+# Build output
 dist
 dist-ssr
-*.local
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.cert
+
+# Rust / Tauri build artifacts
+src-tauri/target/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Local config overrides
+*.local
+
 # SDD workspace artifacts
 .superpowers/
+
+# Misc temp / cache
+.turbo
+.cache
+*.orig
+*.bak
+*.patch
+
+# Agent artifacts
+skills-lock.json
+opencode.jsonc
