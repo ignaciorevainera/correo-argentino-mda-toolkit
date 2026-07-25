@@ -83,7 +83,7 @@ fn execute_diagnostic(
 }
 
 #[tauri::command]
-fn run_net_user(username: String, state: State<'_, AppState>) -> Result<CommandResult, String> {
+fn run_net_user(username: String, _state: State<'_, AppState>) -> Result<CommandResult, String> {
     let command = format!("net user {}", username);
     let result = run_single_command(&command);
     Ok(result)
