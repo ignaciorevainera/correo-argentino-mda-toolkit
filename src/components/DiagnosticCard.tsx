@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useClipboard } from "../hooks/useClipboard";
 import type { CommandResult } from "../types";
@@ -8,6 +8,7 @@ interface DiagnosticCardProps {
   commandName: string;
   commandArgs: Record<string, string>;
   hostname: string;
+  executeTrigger: number;
   disabled?: boolean;
   extraInput?: {
     key: string;
@@ -54,16 +55,19 @@ export default function DiagnosticCard({
   commandName,
   commandArgs,
   hostname,
+  executeTrigger,
   disabled,
   extraInput,
 }: DiagnosticCardProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CommandResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const triggerRef = useRef(executeTrigger);
 
   const isDisabled = disabled || !hostname.trim();
 
   const execute = async () => {
+    if (loading) return;
     setLoading(true);
     setError(null);
     setResult(null);
@@ -76,6 +80,15 @@ export default function DiagnosticCard({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (executeTrigger !== 0 && executeTrigger !== triggerRef.current) {
+      triggerRef.current = executeTrigger;
+      if (!isDisabled) {
+        execute();
+      }
+    }
+  }, [executeTrigger]);
 
   return (
     <div className="bg-base-100 border border-base-300 p-3 flex flex-col gap-2 rounded">
