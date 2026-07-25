@@ -53,7 +53,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <button
             key={item.id}
             onClick={() => setActive(item.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-btn text-sm transition-colors ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-colors ${
               active === item.id
                 ? "bg-primary/20 text-primary font-medium"
                 : "text-base-content/70 hover:bg-base-300 hover:text-base-content"
