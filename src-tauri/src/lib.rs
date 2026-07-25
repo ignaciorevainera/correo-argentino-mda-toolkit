@@ -98,6 +98,27 @@ fn run_msra_offer(hostname: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn run_ping(hostname: String) -> Result<CommandResult, String> {
+    let command = format!("ping -n 4 {}", hostname);
+    let result = run_single_command(&command);
+    Ok(result)
+}
+
+#[tauri::command]
+fn run_net_time(hostname: String) -> Result<CommandResult, String> {
+    let command = format!("net time \\\\{}", hostname);
+    let result = run_single_command(&command);
+    Ok(result)
+}
+
+#[tauri::command]
+fn run_nslookup(hostname: String) -> Result<CommandResult, String> {
+    let command = format!("nslookup {}", hostname);
+    let result = run_single_command(&command);
+    Ok(result)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -109,6 +130,9 @@ pub fn run() {
             execute_diagnostic,
             run_net_user,
             run_msra_offer,
+            run_ping,
+            run_net_time,
+            run_nslookup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
