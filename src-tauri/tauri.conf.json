@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "correo-argentino-mda-toolkit",
+        "title": "MDA Toolkit — Correo Argentino",
         "width": 1024,
         "height": 700
       }

@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState, useEffect } from "react";
 
 export interface DiagnosticInput {
   hostname: string;
@@ -19,6 +19,17 @@ export default function DiagnosticForm({ onSubmit, disabled }: DiagnosticFormPro
     if (!hostname.trim()) return;
     onSubmit({ hostname: hostname.trim(), username: username.trim() });
   };
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && hostname.trim() && !disabled) {
+        e.preventDefault();
+        handleSubmit(e as unknown as FormEvent);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [hostname, disabled]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
