@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "correo-argentino-mda-toolkit",
-        "width": 800,
-        "height": 600
+        "width": 1024,
+        "height": 700
       }
     ],
     "security": {
