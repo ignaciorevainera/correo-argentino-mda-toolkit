@@ -1,0 +1,44 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@import "@fontsource/geist-sans";
+@import "@fontsource/geist-mono";
+
+@plugin "daisyui/theme" {
+  name: "mda";
+  default: true;
+  prefersdark: true;
+  color-scheme: dark;
+  --color-primary: #ffc72c;
+  --color-primary-content: #1a1a1a;
+  --color-secondary: #254888;
+  --color-secondary-content: #ffffff;
+  --color-accent: #3a6ea5;
+  --color-accent-content: #ffffff;
+  --color-base-100: #1d232a;
+  --color-base-200: #191e24;
+  --color-base-300: #15191e;
+  --color-base-content: #e0e0e0;
+  --color-neutral: #2a323c;
+  --color-neutral-content: #a6adbb;
+  --color-info: #3a6ea5;
+  --color-info-content: #ffffff;
+  --color-success: #36d399;
+  --color-success-content: #1a1a1a;
+  --color-warning: #ffc72c;
+  --color-warning-content: #1a1a1a;
+  --color-error: #f87272;
+  --color-error-content: #1a1a1a;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+}
