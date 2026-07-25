@@ -10,13 +10,15 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [
-      {
-        "title": "MDA Toolkit — Correo Argentino",
-        "width": 1024,
-        "height": 700
-      }
-    ],
+  "windows": [
+    {
+      "title": "MDA Toolkit — Correo Argentino",
+      "width": 1024,
+      "height": 700,
+      "minWidth": 640,
+      "minHeight": 480
+    }
+  ],
     "security": {
       "csp": null
     }
