@@ -23,28 +23,22 @@ export default function MsraCard({ hostname, disabled }: MsraCardProps) {
   const isDisabled = disabled || !hostname.trim() || status !== "idle";
 
   return (
-    <div className="rounded-box bg-base-200 border border-base-300 p-4 flex flex-col gap-3 min-w-0">
+    <div className="bg-base-100 border border-base-300 p-3 flex flex-col gap-2 rounded">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-secondary truncate">Asistencia Remota</h3>
+        <h3 className="text-xs font-semibold text-secondary">Asistencia Remota</h3>
+        <button
+          onClick={launch}
+          disabled={isDisabled}
+          className="btn btn-outline btn-secondary btn-xs"
+        >
+          {status === "launching" && (
+            <span className="loading loading-spinner loading-xs"></span>
+          )}
+          {status === "launched" && "✓ "}
+          {status === "idle" && "Abrir"}
+        </button>
       </div>
-
-      <p className="text-xs text-base-content/50">
-        Abre MSRA para ofrecer asistencia remota al equipo de destino.
-      </p>
-
-      <button
-        onClick={launch}
-        disabled={isDisabled}
-        className="btn btn-outline btn-secondary btn-sm"
-      >
-        {status === "launching" && (
-          <span className="loading loading-spinner loading-xs"></span>
-        )}
-        {status === "launched" && "✓ "}
-        {status === "idle" && "Abrir Asistencia Remota"}
-      </button>
-
-      <p className="text-xs text-base-content/30 font-mono truncate">
+      <p className="text-xs text-base-content/50 font-mono truncate">
         msra.exe /offerRA {hostname || "<hostname>"}
       </p>
     </div>

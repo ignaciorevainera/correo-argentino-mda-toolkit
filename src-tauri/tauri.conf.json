@@ -12,10 +12,10 @@
   "app": {
   "windows": [
     {
-      "title": "MDA Toolkit — Correo Argentino",
-      "width": 1024,
-      "height": 700,
-      "minWidth": 640,
+      "title": "MDA Toolkit",
+      "width": 700,
+      "height": 750,
+      "minWidth": 420,
       "minHeight": 480
     }
   ],
