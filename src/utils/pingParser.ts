@@ -4,7 +4,7 @@ export interface PingResult {
 }
 
 const LATENCY_RE = /time[=<](\d+)ms/i;
-const FAIL_RE = /(timed out|unreachable|perdidos)/i;
+const FAIL_RE = /(timed out|unreachable|perdidos|espera agotado)/i;
 
 export function parsePingOutput(lines: string[]): PingResult[] {
   const results: PingResult[] = [];

@@ -20,6 +20,7 @@ export function useCommandStream() {
   }, []);
 
   const execute = useCallback(async (command: string) => {
+    if (loading) return;
     setLoading(true);
     setError(null);
     setLines([]);
