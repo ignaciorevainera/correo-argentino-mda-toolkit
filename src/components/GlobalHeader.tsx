@@ -8,7 +8,7 @@ export default function GlobalHeader({
   onHostnameChange,
 }: GlobalHeaderProps) {
   return (
-    <div className="w-full px-3 py-2">
+    <div className="w-full px-3 py-1">
       <div className="flex items-center gap-2">
         <span className="text-xs font-semibold text-secondary shrink-0">
           Host

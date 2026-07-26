@@ -13,10 +13,10 @@
     "windows": [
       {
         "title": "Correo Argentino MDA Toolkit",
-        "width": 560,
-        "height": 480,
-        "minWidth": 420,
-        "minHeight": 400,
+        "width": 360,
+        "height": 220,
+        "minWidth": 360,
+        "minHeight": 220,
         "resizable": true
       }
     ],

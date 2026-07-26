@@ -59,8 +59,8 @@ function App() {
     >
       <GlobalHeader hostname={hostname} onHostnameChange={setHostname} />
 
-      <div className="flex-1 flex flex-col justify-center px-4 gap-4">
-        <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-col gap-2 px-3 py-1">
+        <div className="grid grid-cols-2 gap-1.5">
           <button
             onClick={() => openModal("ping")}
             disabled={!hostEnabled}
@@ -91,8 +91,7 @@ function App() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
             <span className="text-xs font-semibold text-secondary shrink-0">
               Usuario
             </span>
@@ -111,7 +110,6 @@ function App() {
               net user /do
             </button>
           </div>
-        </div>
       </div>
 
       <PingModal
