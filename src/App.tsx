@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -49,6 +49,12 @@ function App() {
 
   const [hostname, setHostname] = useState("");
   const [username, setUsername] = useState("");
+  const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
+
+  const showStatus = useCallback((msg: string, type: "error" | "ok") => {
+    setStatus({ msg, type });
+    setTimeout(() => setStatus(null), 4000);
+  }, []);
 
   const trimmedHost = hostname.trim();
   const trimmedUser = username.trim();
@@ -69,10 +75,13 @@ function App() {
         resizable: true,
       });
       win.once("tauri://error", (e: unknown) => {
-        console.error("Error al crear ventana:", e);
+        const msg = e instanceof Object && "payload" in (e as object)
+          ? String((e as { payload: unknown }).payload)
+          : String(e);
+        showStatus(`Error al crear ventana: ${msg}`, "error");
       });
     } catch (err) {
-      console.error("Error al abrir ventana:", err);
+      showStatus(`Error al abrir ventana: ${err instanceof Error ? err.message : String(err)}`, "error");
     }
   };
 
@@ -82,6 +91,12 @@ function App() {
       data-theme="mda"
     >
       <GlobalHeader hostname={hostname} onHostnameChange={setHostname} />
+
+      {status && (
+        <div className={`text-xs px-2 py-1 rounded ${status.type === "error" ? "bg-error/10 text-error" : "bg-success/10 text-success"}`}>
+          {status.msg}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-1 grow *:h-full">
         <button
