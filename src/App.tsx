@@ -100,6 +100,7 @@ function App() {
           onChange={(e) => setUsername(e.target.value)}
           placeholder="usuario"
           className="input input-sm w-full font-mono text-xs"
+          autoComplete="off"
         />
         <button
           onClick={() => openModal("netuser")}

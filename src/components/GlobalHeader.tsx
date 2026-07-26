@@ -17,6 +17,7 @@ export default function GlobalHeader({
           onChange={(e) => onHostnameChange(e.target.value)}
           placeholder="hostname o dirección IPv4"
           className="input input-sm w-full font-mono text-xs"
+          autoComplete="off"
           autoFocus
         />
       </div>
