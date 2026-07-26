@@ -32,6 +32,8 @@ function routerIp(hostname: string): string {
 type ModalType = "ping" | "router" | "nslookup" | "nettime" | "netuser";
 
 function App() {
+  useUpdater();
+
   const [hostname, setHostname] = useState("");
   const [username, setUsername] = useState("");
   const [activeModal, setActiveModal] = useState<ModalType | null>(null);
