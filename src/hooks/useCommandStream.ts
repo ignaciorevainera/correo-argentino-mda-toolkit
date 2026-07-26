@@ -57,7 +57,7 @@ export function useCommandStream() {
         unlistenDone();
       }
     }
-  }, []);
+  }, [loading]);
 
   return { execute, loading, lines, exitCode, error };
 }
