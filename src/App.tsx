@@ -54,62 +54,60 @@ function App() {
 
   return (
     <div
-      className="h-screen flex flex-col bg-base-100 text-base-content"
+      className="h-screen flex flex-col gap-2 bg-base-100 p-2 text-base-content"
       data-theme="mda"
     >
       <GlobalHeader hostname={hostname} onHostnameChange={setHostname} />
 
-      <div className="flex flex-col gap-2 px-3 py-1">
-        <div className="grid grid-cols-2 gap-1.5">
-          <button
-            onClick={() => openModal("ping")}
-            disabled={!hostEnabled}
-            className="btn btn-primary btn-sm"
-          >
-            Ping
-          </button>
-          <button
-            onClick={() => openModal("router")}
-            disabled={!hostEnabled}
-            className="btn btn-secondary btn-sm"
-          >
-            .250
-          </button>
-          <button
-            onClick={() => openModal("nslookup")}
-            disabled={!hostEnabled}
-            className="btn btn-accent btn-sm"
-          >
-            nslookup
-          </button>
-          <button
-            onClick={() => openModal("nettime")}
-            disabled={!hostEnabled}
-            className="btn btn-neutral btn-sm"
-          >
-            net time
-          </button>
-        </div>
+      <div className="grid grid-cols-2 gap-1 grow *:h-full">
+        <button
+          onClick={() => openModal("ping")}
+          disabled={!hostEnabled}
+          className="btn btn-primary btn-sm"
+        >
+          ping
+        </button>
+        <button
+          onClick={() => openModal("router")}
+          disabled={!hostEnabled}
+          className="btn btn-secondary btn-sm"
+        >
+          ping .250
+        </button>
+        <button
+          onClick={() => openModal("nslookup")}
+          disabled={!hostEnabled}
+          className="btn btn-accent btn-sm"
+        >
+          nslookup
+        </button>
+        <button
+          onClick={() => openModal("nettime")}
+          disabled={!hostEnabled}
+          className="btn btn-neutral btn-sm"
+        >
+          net time
+        </button>
+      </div>
 
-        <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-secondary shrink-0">
-              Usuario
-            </span>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="usuario"
-              className="input input-sm w-full font-mono text-xs"
-            />
-            <button
-              onClick={() => openModal("netuser")}
-              disabled={!userEnabled}
-              className="btn btn-primary btn-sm shrink-0"
-            >
-              net user /do
-            </button>
-          </div>
+      <div className="flex items-center gap-1">
+        <span className="text-xs font-semibold text-secondary shrink-0">
+          Usuario
+        </span>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="usuario"
+          className="input input-sm w-full font-mono text-xs"
+        />
+        <button
+          onClick={() => openModal("netuser")}
+          disabled={!userEnabled}
+          className="btn btn-primary btn-sm shrink-0"
+        >
+          net user /do
+        </button>
       </div>
 
       <PingModal
