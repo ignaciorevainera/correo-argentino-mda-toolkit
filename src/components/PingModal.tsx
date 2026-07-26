@@ -42,12 +42,18 @@ function PingBar({ result, maxMs }: { result: PingResult; maxMs: number }) {
 export default function PingModal({ open, onClose, title, command }: PingModalProps) {
   const { execute, loading, lines, exitCode, error } = useCommandStream();
   const prevOpen = useRef(false);
+  const commandRef = useRef(command);
 
   useEffect(() => {
-    if (open && !prevOpen.current) {
-      execute(command);
+    if (open) {
+      const openedNow = !prevOpen.current;
+      const commandChanged = command !== commandRef.current;
+      if (openedNow || commandChanged) {
+        execute(command);
+      }
     }
     prevOpen.current = open;
+    commandRef.current = command;
   }, [open, command, execute]);
 
   const results = parsePingOutput(lines);
