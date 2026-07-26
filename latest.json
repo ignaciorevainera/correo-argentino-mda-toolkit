@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "notes": "Lanzamiento inicial de Correo Argentino MDA Toolkit",
+  "pub_date": "2026-07-25T00:00:00Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRMW5BcEZHNGhEd0hobUJzSlRRVVRaTVhGOW81RjdaQmJnc3ZIZnZiVDJvRTE1a2F6NDR0aVRGdjc4dWM3RWtROFhscUxEdUVoZlZSWW5LN2YycmFodDFqTnRJbUpVbHdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1MDMwMzkzCWZpbGU6Y29ycmVvLWFyZ2VudGluby1tZGEtdG9vbGtpdF8wLjEuMF94NjRfZW4tVVMubXNpCldMaDhmTy94SlNuSnBkQnlUdzdqMnBxZkZaM1pDTUp2RXU2WEU0QXFVWFRvNVErU2NXRzFoUEszRE5Za2duRkIyelNQMkFROU1wSHpRbE5HWlRHUkNnPT0K",
+      "url": "https://github.com/tu-usuario/correo-argentino-mda-toolkit/releases/download/v0.1.0/src-tauri/target/release/bundle/msi/correo-argentino-mda-toolkit_0.1.0_x64_en-US.msi"
+    }
+  }
+}

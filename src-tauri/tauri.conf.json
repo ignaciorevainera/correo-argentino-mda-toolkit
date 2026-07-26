@@ -25,6 +25,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -36,7 +37,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/tu-usuario/correo-argentino-mda-toolkit/releases/latest/download/latest.json"
+        "https://github.com/ignaciorevainera/correo-argentino-mda-toolkit/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEMwNDM4ODFCNDUwQTlDMzUKUldRMW5BcEZHNGhEd01WTzNINndiUzBYVGliNENicklPVWo1YVBraTZtREZ0M1h3c0VsTC84VGoK"
     }
