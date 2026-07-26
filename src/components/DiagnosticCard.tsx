@@ -10,6 +10,7 @@ interface DiagnosticCardProps {
   hostname: string;
   executeTrigger: number;
   disabled?: boolean;
+  requiresHostname?: boolean;
   extraInput?: {
     key: string;
     label: string;
@@ -58,6 +59,7 @@ export default function DiagnosticCard({
   hostname,
   executeTrigger,
   disabled,
+  requiresHostname = true,
   extraInput,
 }: DiagnosticCardProps) {
   const [loading, setLoading] = useState(false);
@@ -67,7 +69,7 @@ export default function DiagnosticCard({
   const triggerRef = useRef(executeTrigger);
   const abortRef = useRef(false);
 
-  const isDisabled = disabled || !hostname.trim();
+  const isDisabled = disabled || (requiresHostname && !hostname.trim());
 
   const execute = useCallback(async () => {
     if (loading) return;

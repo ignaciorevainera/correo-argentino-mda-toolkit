@@ -127,6 +127,15 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![run_command_stream, run_msra_offer])
+        
+        .setup(|app| {
+            // Coloca la línea aquí dentro:
+            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+            
+            Ok(())
+        })
+
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
