@@ -54,7 +54,7 @@ function App() {
   const [hostname, setHostname] = useState("");
 
   useEffect(() => {
-    let registered = false;
+    let active = true;
     const setupShortcut = async () => {
       try {
         await register("CommandOrControl+Space", async (event) => {
@@ -67,10 +67,13 @@ function App() {
             const text = await readText();
             if (text) {
               setHostname(text);
+              document.getElementById("global-hostname")?.focus();
             }
           }
         });
-        registered = true;
+        if (!active) {
+          await unregister("CommandOrControl+Space");
+        }
       } catch (err) {
         console.error("Shortcut error:", err);
       }
@@ -79,9 +82,8 @@ function App() {
     setupShortcut();
 
     return () => {
-      if (registered) {
-        unregister("CommandOrControl+Space").catch(console.error);
-      }
+      active = false;
+      unregister("CommandOrControl+Space").catch(() => {});
     };
   }, []);
   const [username, setUsername] = useState("");
