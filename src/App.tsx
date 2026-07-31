@@ -7,6 +7,7 @@ import { readText } from "@tauri-apps/plugin-clipboard-manager";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import GlobalHeader from "./components/GlobalHeader";
 import { useInputHistory } from "./hooks/useInputHistory";
+import { classifyIpInput } from "./utils/ip";
 import { version } from "../package.json";
 
 export function useUpdater() {
@@ -117,13 +118,19 @@ function App() {
   const userEnabled = trimmedUser.length > 0;
 
   const openWindow = async (type: ActionType) => {
+    const classification = classifyIpInput(trimmedHost);
+
+    if (classification.kind === "invalid-ip") {
+      showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
+      return;
+    }
+
     if (hostEnabled && type !== "netuser") {
       addHistory(trimmedHost);
     }
-    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(trimmedHost);
-    const targetHost = isIp || trimmedHost.toLowerCase().endsWith(".correo.local")
-      ? trimmedHost
-      : `${trimmedHost}.correo.local`;
+    const targetHost = classification.kind === "ip" || classification.value.toLowerCase().endsWith(".correo.local")
+      ? classification.value
+      : `${classification.value}.correo.local`;
     const cfg = actionConfig(type, targetHost, trimmedUser);
     const params = new URLSearchParams({ type: cfg.type, title: cfg.title, command: cfg.command });
     const url = `/?${params.toString()}`;
