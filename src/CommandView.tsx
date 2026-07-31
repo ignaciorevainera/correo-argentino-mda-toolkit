@@ -79,8 +79,8 @@ export default function CommandView() {
 
   return (
     <div className="h-screen flex flex-col bg-base-100 text-base-content p-3 gap-2">
-      <div className="flex items-start justify-between shrink-0 gap-2">
-        <div className="min-w-0 flex flex-col">
+      <div data-tauri-drag-region className="flex items-start justify-between shrink-0 gap-2">
+        <div data-tauri-drag-region className="min-w-0 flex flex-col">
           <h1 className="text-sm font-semibold text-secondary truncate">{title}</h1>
           <span className="text-xs font-mono text-base-content/50 truncate">{command}</span>
         </div>
