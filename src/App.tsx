@@ -7,6 +7,7 @@ import { readText } from "@tauri-apps/plugin-clipboard-manager";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import GlobalHeader from "./components/GlobalHeader";
 import { useInputHistory } from "./hooks/useInputHistory";
+import { version } from "../package.json";
 
 export function useUpdater() {
   useEffect(() => {
@@ -218,6 +219,10 @@ function App() {
         >
           net user /do
         </button>
+      </div>
+      <div className="flex justify-between items-center text-[9px] text-base-content/40 px-1 mt-auto select-none">
+        <span></span>
+        <span>v{version}</span>
       </div>
     </div>
   );
