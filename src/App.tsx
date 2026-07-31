@@ -120,7 +120,7 @@ function App() {
   const openWindow = async (type: ActionType) => {
     const classification = classifyIpInput(trimmedHost);
 
-    if (classification.kind === "invalid-ip") {
+    if (classification.kind === "invalid-ip" && type !== "netuser") {
       showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
       return;
     }
