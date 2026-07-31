@@ -182,7 +182,10 @@ mod tests {
         let child = spawn_cmd("ping -n 2 127.0.0.1").expect("cmd must spawn");
         let output = child.wait_with_output().await.expect("wait must succeed");
         assert!(output.status.success(), "ping must exit 0");
-        assert!(!output.stdout.is_empty(), "ping stdout must still be captured");
+        assert!(
+            String::from_utf8_lossy(&output.stdout).contains("127.0.0.1"),
+            "ping stdout must still be captured and contain the target"
+        );
     }
 
     #[tokio::test]
@@ -194,6 +197,14 @@ mod tests {
             .expect("cmd must run");
         assert!(output.status.success());
         assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "hidden-ok");
+    }
+
+    #[tokio::test]
+    async fn hidden_cmd_stderr_still_streams() {
+        let child = spawn_cmd("echo err-ok 1>&2").expect("cmd must spawn");
+        let output = child.wait_with_output().await.expect("wait must succeed");
+        assert!(output.status.success());
+        assert_eq!(String::from_utf8_lossy(&output.stderr).trim(), "err-ok");
     }
 }
 
