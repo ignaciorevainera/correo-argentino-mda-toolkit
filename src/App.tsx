@@ -142,6 +142,7 @@ function App() {
         height: 400,
         title: cfg.title,
         resizable: true,
+        decorations: false,
       });
       win.once("tauri://error", (e: unknown) => {
         const msg = e instanceof Object && "payload" in (e as object)
