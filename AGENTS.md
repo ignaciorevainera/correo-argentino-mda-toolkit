@@ -21,7 +21,7 @@ Tauri dev URL: `http://localhost:1420`. HMR port: `1421` (when `TAURI_DEV_HOST` 
 
 **Popup window (`CommandView.tsx`):** Receives `type`, `title`, `command` from URL. Auto-executes command on mount via `useCommandStream`. Shows structured output (ping bars for ping type, raw text for others).
 
-**Rust backend:** 2 Tauri commands — `run_command_stream` (executes `cmd /c <command>`, streams stdout/stderr line-by-line via `command-line` / `command-done` events, hidden cmd window via `CREATE_NO_WINDOW`), `run_msra_offer` (spawns `msra.exe /offerRA <hostname>`)
+**Rust backend:** 2 Tauri commands — `run_command_stream` (executes `cmd /c <command>` via shared `spawn_cmd` helper with `creation_flags(0x08000000)` / `CREATE_NO_WINDOW`, streams stdout/stderr line-by-line via `command-line` / `command-done` events, no visible console window ever), `run_msra_offer` (spawns `msra.exe /offerRA <hostname>` with the same `CREATE_NO_WINDOW` flag). Regression tests in `src-tauri/src/lib.rs` (`#[cfg(test)] mod tests`) verify output still streams with the flag set.
 
 **IPC pattern:** `invoke("run_command_stream", { id, command })` + `listen("command-line")` / `listen("command-done")`. Each listen returns an `unlisten` function — must call on completion/error to prevent stale listeners. Events emit to caller window (popup invokes → popup receives events).
 
@@ -63,7 +63,7 @@ Popup windows (`result-*`) have same permissions via wildcard match.
 
 - **No CSP:** `security.csp: null` — agent modifying security should set explicit CSP.
 - **Window:** 360x200, min 360x200, not resizable.
-- **CREATE_NO_WINDOW:** `run_command_stream` uses `creation_flags(0x08000000)` on Windows to hide cmd window.
+- **CREATE_NO_WINDOW:** both `run_command_stream` and `run_msra_offer` use the shared `CREATE_NO_WINDOW` constant (`creation_flags(0x08000000)`) on Windows so no console window ever appears.
 - **Signing:** `createUpdaterArtifacts: false` — no private key configured. Set `TAURI_SIGNING_PRIVATE_KEY` env var to enable.
 
 ## What's NOT configured
