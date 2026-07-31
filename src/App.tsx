@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
+import { readText } from "@tauri-apps/plugin-clipboard-manager";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import GlobalHeader from "./components/GlobalHeader";
 import { useInputHistory } from "./hooks/useInputHistory";
 
@@ -49,6 +52,38 @@ function App() {
   useUpdater();
 
   const [hostname, setHostname] = useState("");
+
+  useEffect(() => {
+    let registered = false;
+    const setupShortcut = async () => {
+      try {
+        await register("CommandOrControl+Space", async (event) => {
+          if (event.state === "Pressed") {
+            const win = getCurrentWindow();
+            await win.show();
+            await win.unminimize();
+            await win.setFocus();
+            
+            const text = await readText();
+            if (text) {
+              setHostname(text);
+            }
+          }
+        });
+        registered = true;
+      } catch (err) {
+        console.error("Shortcut error:", err);
+      }
+    };
+
+    setupShortcut();
+
+    return () => {
+      if (registered) {
+        unregister("CommandOrControl+Space").catch(console.error);
+      }
+    };
+  }, []);
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
 
