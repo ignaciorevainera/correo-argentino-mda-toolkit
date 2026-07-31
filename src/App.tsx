@@ -86,6 +86,18 @@ function App() {
       unregister("CommandOrControl+Space").catch(() => {});
     };
   }, []);
+
+  useEffect(() => {
+    const win = getCurrentWindow();
+    const unlisten = win.onCloseRequested((event) => {
+      event.preventDefault();
+      win.hide();
+    });
+    return () => {
+      unlisten.then(f => f());
+    };
+  }, []);
+
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
 
