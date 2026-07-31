@@ -1,5 +1,6 @@
 use encoding_rs::WINDOWS_1252;
 use serde::Serialize;
+use std::os::windows::process::CommandExt;
 use std::process::Command as StdCommand;
 use tauri::{menu::{Menu, MenuItem}, tray::TrayIconBuilder, Emitter, Manager};
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -28,6 +29,17 @@ fn decode_windows_output(bytes: Vec<u8>) -> String {
             decoded.into_owned()
         }
     }
+}
+
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+fn spawn_cmd(command: &str) -> std::io::Result<tokio::process::Child> {
+    Command::new("cmd")
+        .args(["/c", command])
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .creation_flags(CREATE_NO_WINDOW)
+        .spawn()
 }
 
 async fn stream_output<R: tokio::io::AsyncRead + Unpin>(
@@ -66,12 +78,7 @@ async fn run_command_stream(
     id: String,
     command: String,
 ) -> Result<(), String> {
-    let mut child = Command::new("cmd")
-        .args(["/c", &command])
-        .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
-        .spawn()
-        .map_err(|e| format!("Failed to spawn: {}", e))?;
+    let mut child = spawn_cmd(&command).map_err(|e| format!("Failed to spawn: {}", e))?;
 
     let stdout = child
         .stdout
@@ -163,5 +170,29 @@ pub fn run() {
 
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn hidden_cmd_streams_output_through_pipes() {
+        let child = spawn_cmd("ping -n 2 127.0.0.1").expect("cmd must spawn");
+        let output = child.wait_with_output().await.expect("wait must succeed");
+        assert!(output.status.success(), "ping must exit 0");
+        assert!(!output.stdout.is_empty(), "ping stdout must still be captured");
+    }
+
+    #[tokio::test]
+    async fn hidden_std_command_captures_output() {
+        let output = StdCommand::new("cmd")
+            .creation_flags(CREATE_NO_WINDOW)
+            .args(["/c", "echo hidden-ok"])
+            .output()
+            .expect("cmd must run");
+        assert!(output.status.success());
+        assert_eq!(String::from_utf8_lossy(&output.stdout).trim(), "hidden-ok");
+    }
 }
 
