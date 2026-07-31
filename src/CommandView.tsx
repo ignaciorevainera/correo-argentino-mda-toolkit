@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useCommandStream } from "./hooks/useCommandStream";
 import { parsePingOutput } from "./utils/pingParser";
 import type { PingResult } from "./utils/pingParser";
@@ -53,8 +54,22 @@ export default function CommandView() {
     }
   }, [execute, command]);
 
-  const handleClose = () => {
-    getCurrentWebviewWindow().close();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        getCurrentWebviewWindow().close();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleCopy = async () => {
+    await writeText(lines.join("\n"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const results = type === "ping" ? parsePingOutput(lines) : [];
@@ -64,10 +79,17 @@ export default function CommandView() {
 
   return (
     <div className="h-screen flex flex-col bg-base-100 text-base-content p-3 gap-2">
-      <div className="flex items-center justify-between shrink-0">
-        <h1 className="text-sm font-semibold text-secondary truncate">{title}</h1>
-        <button onClick={handleClose} className="btn btn-ghost btn-xs" aria-label="Cerrar">
-          ✕
+      <div className="flex items-start justify-between shrink-0 gap-2">
+        <div className="min-w-0 flex flex-col">
+          <h1 className="text-sm font-semibold text-secondary truncate">{title}</h1>
+          <span className="text-xs font-mono text-base-content/50 truncate">{command}</span>
+        </div>
+        <button
+          onClick={handleCopy}
+          className="btn btn-ghost btn-xs shrink-0"
+          aria-label="Copiar al portapapeles"
+        >
+          {copied ? "Copiado" : "Copiar"}
         </button>
       </div>
 
