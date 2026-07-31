@@ -129,9 +129,12 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![run_command_stream, run_msra_offer])
         
         .setup(|app| {
-            // Coloca la línea aquí dentro:
             app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
-            
+            #[cfg(desktop)]
+            {
+                app.handle().plugin(tauri_plugin_clipboard_manager::init())?;
+                app.handle().plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
+            }
             Ok(())
         })
 

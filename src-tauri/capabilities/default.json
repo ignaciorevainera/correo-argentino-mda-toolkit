@@ -8,6 +8,12 @@
     "opener:default",
     "updater:default",
     "core:webview:allow-create-webview-window",
-    "core:window:allow-close"
+    "core:window:allow-close",
+    "clipboard-manager:default",
+    "global-shortcut:default",
+    "core:window:allow-set-focus",
+    "core:window:allow-unminimize",
+    "core:window:allow-hide",
+    "core:window:allow-show"
   ]
 }
