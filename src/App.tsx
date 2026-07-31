@@ -27,6 +27,8 @@ export function useUpdater() {
 }
 
 function routerIp(hostname: string): string {
+  const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
+  if (!isIp) return hostname;
   const lastDot = hostname.lastIndexOf(".");
   return lastDot > 0 ? hostname.slice(0, lastDot) + ".250" : hostname;
 }
@@ -117,7 +119,11 @@ function App() {
     if (hostEnabled && type !== "netuser") {
       addHistory(trimmedHost);
     }
-    const cfg = actionConfig(type, trimmedHost, trimmedUser);
+    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(trimmedHost);
+    const targetHost = isIp || trimmedHost.toLowerCase().endsWith(".correo.local")
+      ? trimmedHost
+      : `${trimmedHost}.correo.local`;
+    const cfg = actionConfig(type, targetHost, trimmedUser);
     const params = new URLSearchParams({ type: cfg.type, title: cfg.title, command: cfg.command });
     const url = `/?${params.toString()}`;
 
@@ -151,7 +157,12 @@ function App() {
           setHostname(val);
           resetIndex();
         }}
-        onKeyDown={handleKeyDown} 
+        onKeyDown={(e) => {
+          handleKeyDown(e);
+          if (e.key === "Enter" && hostEnabled) {
+            openWindow("ping");
+          }
+        }} 
       />
 
       {status && (
