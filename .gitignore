@@ -60,6 +60,9 @@ $RECYCLE.BIN/
 # SDD workspace artifacts
 .superpowers/
 
+# Git worktrees
+.worktrees/
+
 # Misc temp / cache
 .turbo
 .cache
