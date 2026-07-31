@@ -3,6 +3,7 @@ import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import GlobalHeader from "./components/GlobalHeader";
+import { useInputHistory } from "./hooks/useInputHistory";
 
 export function useUpdater() {
   useEffect(() => {
@@ -51,6 +52,8 @@ function App() {
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
 
+  const { addHistory, handleKeyDown, resetIndex } = useInputHistory(setHostname, 20);
+
   const showStatus = useCallback((msg: string, type: "error" | "ok") => {
     setStatus({ msg, type });
     setTimeout(() => setStatus(null), 4000);
@@ -62,6 +65,9 @@ function App() {
   const userEnabled = trimmedUser.length > 0;
 
   const openWindow = async (type: ActionType) => {
+    if (hostEnabled && type !== "netuser") {
+      addHistory(trimmedHost);
+    }
     const cfg = actionConfig(type, trimmedHost, trimmedUser);
     const params = new URLSearchParams({ type: cfg.type, title: cfg.title, command: cfg.command });
     const url = `/?${params.toString()}`;
@@ -90,7 +96,14 @@ function App() {
       className="h-screen flex flex-col gap-2 bg-base-100 p-2 text-base-content"
       data-theme="mda"
     >
-      <GlobalHeader hostname={hostname} onHostnameChange={setHostname} />
+      <GlobalHeader 
+        hostname={hostname} 
+        onHostnameChange={(val) => {
+          setHostname(val);
+          resetIndex();
+        }}
+        onKeyDown={handleKeyDown} 
+      />
 
       {status && (
         <div className={`text-xs px-2 py-1 rounded ${status.type === "error" ? "bg-error/10 text-error" : "bg-success/10 text-success"}`}>

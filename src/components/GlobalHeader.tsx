@@ -1,11 +1,13 @@
 interface GlobalHeaderProps {
   hostname: string;
   onHostnameChange: (hostname: string) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export default function GlobalHeader({
   hostname,
   onHostnameChange,
+  onKeyDown,
 }: GlobalHeaderProps) {
   return (
     <div className="w-full">
@@ -15,6 +17,7 @@ export default function GlobalHeader({
           type="text"
           value={hostname}
           onChange={(e) => onHostnameChange(e.target.value)}
+          onKeyDown={onKeyDown}
           placeholder="hostname o dirección IPv4"
           className="input input-sm w-full font-mono text-xs"
           autoComplete="off"
