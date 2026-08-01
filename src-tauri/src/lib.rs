@@ -41,6 +41,8 @@ fn kill_process_tree(pid: u32) -> std::io::Result<std::process::ExitStatus> {
     StdCommand::new("taskkill")
         .creation_flags(CREATE_NO_WINDOW)
         .args(["/F", "/T", "/PID", &pid.to_string()])
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
         .spawn()?
         .wait()
 }
@@ -146,7 +148,10 @@ async fn stop_command_stream(
 ) -> Result<(), String> {
     let pid = state.lock().unwrap().remove(&id);
     if let Some(pid) = pid {
-        kill_process_tree(pid).map_err(|e| format!("Failed to kill process: {}", e))?;
+        let status = kill_process_tree(pid).map_err(|e| format!("Failed to kill process {}: {}", pid, e))?;
+        if !status.success() {
+            return Err(format!("Failed to kill process {}: taskkill exited {:?}", pid, status.code()));
+        }
     }
     Ok(())
 }

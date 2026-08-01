@@ -57,8 +57,9 @@ export default function CommandView() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !e.repeat) {
+        await stop();
         getCurrentWebviewWindow().close();
       }
     };
@@ -102,7 +103,10 @@ export default function CommandView() {
             {copied ? "Copiado" : "Copiar"}
           </button>
           <button
-            onClick={() => getCurrentWebviewWindow().close()}
+            onClick={async () => {
+              await stop();
+              getCurrentWebviewWindow().close();
+            }}
             className="btn btn-ghost btn-xs"
             aria-label="Cerrar ventana"
           >

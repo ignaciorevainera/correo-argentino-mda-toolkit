@@ -199,6 +199,7 @@ function App() {
             disabled={!hostEnabled}
             className="btn btn-primary btn-sm btn-outline shrink-0 px-2"
             title="Ping continuo"
+            aria-label="Ping continuo"
           >
             ∞
           </button>
@@ -216,6 +217,7 @@ function App() {
             disabled={!hostEnabled}
             className="btn btn-secondary btn-sm btn-outline shrink-0 px-2"
             title="Ping continuo"
+            aria-label="Ping continuo"
           >
             ∞
           </button>
