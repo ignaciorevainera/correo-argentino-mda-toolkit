@@ -1,6 +1,7 @@
 use encoding_rs::WINDOWS_1252;
 use serde::Serialize;
 use std::collections::HashMap;
+use std::net::ToSocketAddrs;
 use std::os::windows::process::CommandExt;
 use std::process::Command as StdCommand;
 use std::sync::{Arc, Mutex};
@@ -166,6 +167,31 @@ fn run_msra_offer(hostname: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn run_vnc(hostname: String) -> Result<(), String> {
+    StdCommand::new("vncviewer.exe")
+        .creation_flags(CREATE_NO_WINDOW)
+        .arg(&hostname)
+        .spawn()
+        .map_err(|e| format!("No se pudo abrir VNC Viewer: {}", e))?;
+    Ok(())
+}
+
+#[tauri::command]
+fn resolve_host(hostname: String) -> Result<String, String> {
+    let addrs = (hostname.as_str(), 0u16)
+        .to_socket_addrs()
+        .map_err(|e| format!("No se pudo resolver '{}': {}", hostname, e))?;
+    let ip = addrs
+        .filter_map(|addr| match addr.ip() {
+            std::net::IpAddr::V4(v4) => Some(v4.to_string()),
+            _ => None,
+        })
+        .next()
+        .ok_or_else(|| format!("Sin dirección IPv4 para '{}'", hostname))?;
+    Ok(ip)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -173,7 +199,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             run_command_stream,
             stop_command_stream,
-            run_msra_offer
+            run_msra_offer,
+            run_vnc,
+            resolve_host
         ])
         
         .setup(|app| {
