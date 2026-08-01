@@ -19,16 +19,16 @@ Tauri dev URL: `http://localhost:1420`. HMR port: `1421` (when `TAURI_DEV_HOST` 
 
 **Main window (`App.tsx`):** hostname input + username input + grid of action buttons. Each button calls `WebviewWindow` to open a separate popup window with command params in URL.
 
-**Popup window (`CommandView.tsx`):** Receives `type`, `title`, `command` from URL. Auto-executes command on mount via `useCommandStream`. Shows structured output (ping bars for ping type, raw text for others).
+**Popup window (`CommandView.tsx`):** Receives `type`, `title`, `command` from URL. Auto-executes command on mount via `useCommandStream`. Shows structured output (ping bars for ping type, raw text for others). Header has `[Detener] [Copiar] [✕]`; Detener (visible while running) calls `stop()` to kill the command without closing; Escape and ✕ stop the command before closing.
 
-**Rust backend:** 2 Tauri commands — `run_command_stream` (executes `cmd /c <command>` via shared `spawn_cmd` helper with `creation_flags(0x08000000)` / `CREATE_NO_WINDOW`, streams stdout/stderr line-by-line via `command-line` / `command-done` events, no visible console window ever), `run_msra_offer` (spawns `msra.exe /offerRA <hostname>` with the same `CREATE_NO_WINDOW` flag). Regression tests in `src-tauri/src/lib.rs` (`#[cfg(test)] mod tests`) verify output still streams with the flag set.
+**Rust backend:** 3 Tauri commands — `run_command_stream` (executes `cmd /c <command>` via shared `spawn_cmd` helper with `creation_flags(0x08000000)` / `CREATE_NO_WINDOW`, streams stdout/stderr line-by-line via `command-line` / `command-done` events, no visible console window ever), `stop_command_stream` (kills a running command by PID via `taskkill /F /T`, tracked in shared `PidMap` = `Arc<Mutex<HashMap<String, u32>>>` managed via `app.manage`), `run_msra_offer` (spawns `msra.exe /offerRA <hostname>` with the same `CREATE_NO_WINDOW` flag). Regression tests in `src-tauri/src/lib.rs` (`#[cfg(test)] mod tests`) verify output still streams with the flag set and that `kill_process_tree` terminates an infinite `ping -t`.
 
-**IPC pattern:** `invoke("run_command_stream", { id, command })` + `listen("command-line")` / `listen("command-done")`. Each listen returns an `unlisten` function — must call on completion/error to prevent stale listeners. Events emit to caller window (popup invokes → popup receives events).
+**IPC pattern:** `invoke("run_command_stream", { id, command })` + `listen("command-line")` / `listen("command-done")`. Each listen returns an `unlisten` function — must call on completion/error to prevent stale listeners. Events emit to caller window (popup invokes → popup receives events). `invoke("stop_command_stream", { id })` kills the process for a run id.
 
 **Windows-1252:** Rust backend decodes cmd output via `encoding_rs::WINDOWS_1252` — UTF-8 fallback, handles Spanish accented chars.
 
 **Key hooks:**
-- `useCommandStream.ts` — wraps `invoke` + `listen`, returns `{ execute, loading, lines, exitCode, error }`
+- `useCommandStream.ts` — wraps `invoke` + `listen`, returns `{ execute, stop, loading, lines, exitCode, error }`
 - Updater hook in `App.tsx` — checks updates on mount via `@tauri-apps/plugin-updater`
 
 **Utility:** `pingParser.ts` — parses Spanish/English ping output into `PingResult[]` with ms and status.
