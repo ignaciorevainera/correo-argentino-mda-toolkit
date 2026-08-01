@@ -35,7 +35,7 @@ function routerIp(hostname: string): string {
   return lastDot > 0 ? hostname.slice(0, lastDot) + ".250" : hostname;
 }
 
-type ActionType = "ping" | "router" | "nslookup" | "nettime" | "netuser";
+type ActionType = "ping" | "router" | "ping-t" | "router-t" | "nslookup" | "nettime" | "netuser";
 
 function actionConfig(type: ActionType, hostname: string, username: string) {
   switch (type) {
@@ -43,6 +43,10 @@ function actionConfig(type: ActionType, hostname: string, username: string) {
       return { type: "ping" as const, title: `Ping — ${hostname}`, command: `ping -n 4 ${hostname}` };
     case "router":
       return { type: "ping" as const, title: `Ping Router — ${routerIp(hostname)}`, command: `ping -n 2 ${routerIp(hostname)}` };
+    case "ping-t":
+      return { type: "ping" as const, title: `Ping continuo — ${hostname}`, command: `ping -t ${hostname}` };
+    case "router-t":
+      return { type: "ping" as const, title: `Ping continuo Router — ${routerIp(hostname)}`, command: `ping -t ${routerIp(hostname)}` };
     case "nslookup":
       return { type: "text" as const, title: `nslookup — ${hostname}`, command: `nslookup ${hostname}` };
     case "nettime":
@@ -182,20 +186,40 @@ function App() {
       )}
 
       <div className="grid grid-cols-2 gap-1 grow *:h-full">
-        <button
-          onClick={() => openWindow("ping")}
-          disabled={!hostEnabled}
-          className="btn btn-primary btn-sm"
-        >
-          ping
-        </button>
-        <button
-          onClick={() => openWindow("router")}
-          disabled={!hostEnabled}
-          className="btn btn-secondary btn-sm"
-        >
-          ping .250
-        </button>
+        <div className="flex gap-1 *:h-full">
+          <button
+            onClick={() => openWindow("ping")}
+            disabled={!hostEnabled}
+            className="btn btn-primary btn-sm flex-1"
+          >
+            ping
+          </button>
+          <button
+            onClick={() => openWindow("ping-t")}
+            disabled={!hostEnabled}
+            className="btn btn-primary btn-sm btn-outline shrink-0 px-2"
+            title="Ping continuo"
+          >
+            ∞
+          </button>
+        </div>
+        <div className="flex gap-1 *:h-full">
+          <button
+            onClick={() => openWindow("router")}
+            disabled={!hostEnabled}
+            className="btn btn-secondary btn-sm flex-1"
+          >
+            ping .250
+          </button>
+          <button
+            onClick={() => openWindow("router-t")}
+            disabled={!hostEnabled}
+            className="btn btn-secondary btn-sm btn-outline shrink-0 px-2"
+            title="Ping continuo"
+          >
+            ∞
+          </button>
+        </div>
         <button
           onClick={() => openWindow("nslookup")}
           disabled={!hostEnabled}
