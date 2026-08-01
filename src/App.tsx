@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -29,24 +30,36 @@ export function useUpdater() {
 }
 
 function routerIp(hostname: string): string {
+  return octetIp(hostname, "250");
+}
+
+function serverIp(hostname: string): string {
+  return octetIp(hostname, "231");
+}
+
+function octetIp(hostname: string, octet: string): string {
   const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname);
   if (!isIp) return hostname;
   const lastDot = hostname.lastIndexOf(".");
-  return lastDot > 0 ? hostname.slice(0, lastDot) + ".250" : hostname;
+  return lastDot > 0 ? hostname.slice(0, lastDot) + "." + octet : hostname;
 }
 
-type ActionType = "ping" | "router" | "ping-t" | "router-t" | "nslookup" | "nettime" | "netuser";
+type ActionType = "ping" | "router" | "server" | "ping-t" | "router-t" | "server-t" | "nslookup" | "nettime" | "netuser";
 
 function actionConfig(type: ActionType, hostname: string, username: string) {
   switch (type) {
     case "ping":
       return { type: "ping" as const, title: `Ping — ${hostname}`, command: `ping -n 4 ${hostname}` };
     case "router":
-      return { type: "ping" as const, title: `Ping Router — ${routerIp(hostname)}`, command: `ping -n 2 ${routerIp(hostname)}` };
+      return { type: "ping" as const, title: `Ping Router — ${routerIp(hostname)}`, command: `ping -n 4 ${routerIp(hostname)}` };
+    case "server":
+      return { type: "ping" as const, title: `Ping Servidor — ${serverIp(hostname)}`, command: `ping -n 4 ${serverIp(hostname)}` };
     case "ping-t":
       return { type: "ping" as const, title: `Ping continuo — ${hostname}`, command: `ping -t ${hostname}` };
     case "router-t":
       return { type: "ping" as const, title: `Ping continuo Router — ${routerIp(hostname)}`, command: `ping -t ${routerIp(hostname)}` };
+    case "server-t":
+      return { type: "ping" as const, title: `Ping continuo Servidor — ${serverIp(hostname)}`, command: `ping -t ${serverIp(hostname)}` };
     case "nslookup":
       return { type: "text" as const, title: `nslookup — ${hostname}`, command: `nslookup ${hostname}` };
     case "nettime":
@@ -135,7 +148,21 @@ function App() {
     const targetHost = classification.kind === "ip" || classification.value.toLowerCase().endsWith(".correo.local")
       ? classification.value
       : `${classification.value}.correo.local`;
-    const cfg = actionConfig(type, targetHost, trimmedUser);
+
+    const needsOctet = type === "router" || type === "router-t" || type === "server" || type === "server-t";
+    const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(targetHost);
+    let effectiveHost = targetHost;
+
+    if (needsOctet && !isIp) {
+      try {
+        effectiveHost = await invoke<string>("resolve_host", { hostname: targetHost });
+      } catch (err) {
+        showStatus(err instanceof Error ? err.message : String(err), "error");
+        return;
+      }
+    }
+
+    const cfg = actionConfig(type, effectiveHost, trimmedUser);
     const params = new URLSearchParams({ type: cfg.type, title: cfg.title, command: cfg.command });
     const url = `/?${params.toString()}`;
 
@@ -157,6 +184,48 @@ function App() {
       });
     } catch (err) {
       showStatus(`Error al abrir ventana: ${err instanceof Error ? err.message : String(err)}`, "error");
+    }
+  };
+
+  const launchMsra = async () => {
+    const classification = classifyIpInput(trimmedHost);
+
+    if (classification.kind === "invalid-ip") {
+      showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
+      return;
+    }
+
+    addHistory(trimmedHost);
+
+    const targetHost = classification.kind === "ip" || classification.value.toLowerCase().endsWith(".correo.local")
+      ? classification.value
+      : `${classification.value}.correo.local`;
+
+    try {
+      await invoke("run_msra_offer", { hostname: targetHost });
+    } catch (err) {
+      showStatus(err instanceof Error ? err.message : String(err), "error");
+    }
+  };
+
+  const launchVnc = async () => {
+    const classification = classifyIpInput(trimmedHost);
+
+    if (classification.kind === "invalid-ip") {
+      showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
+      return;
+    }
+
+    addHistory(trimmedHost);
+
+    const targetHost = classification.kind === "ip" || classification.value.toLowerCase().endsWith(".correo.local")
+      ? classification.value
+      : `${classification.value}.correo.local`;
+
+    try {
+      await invoke("run_vnc", { hostname: targetHost });
+    } catch (err) {
+      showStatus(err instanceof Error ? err.message : String(err), "error");
     }
   };
 
@@ -201,7 +270,7 @@ function App() {
             title="Ping continuo"
             aria-label="Ping continuo"
           >
-            ∞
+            -t
           </button>
         </div>
         <div className="flex gap-1 *:h-full">
@@ -219,23 +288,57 @@ function App() {
             title="Ping continuo"
             aria-label="Ping continuo"
           >
-            ∞
+            -t
           </button>
         </div>
-        <button
-          onClick={() => openWindow("nslookup")}
-          disabled={!hostEnabled}
-          className="btn btn-accent btn-sm"
-        >
-          nslookup
-        </button>
-        <button
-          onClick={() => openWindow("nettime")}
-          disabled={!hostEnabled}
-          className="btn btn-neutral btn-sm"
-        >
-          net time
-        </button>
+        <div className="flex gap-1 col-span-2 *:h-full">
+          <button
+            onClick={() => openWindow("server")}
+            disabled={!hostEnabled}
+            className="btn btn-accent btn-sm flex-1"
+          >
+            ping .231
+          </button>
+          <button
+            onClick={() => openWindow("server-t")}
+            disabled={!hostEnabled}
+            className="btn btn-accent btn-sm btn-outline shrink-0 px-2"
+            title="Ping continuo"
+            aria-label="Ping continuo"
+          >
+            -t
+          </button>
+          <button
+            onClick={() => openWindow("nslookup")}
+            disabled={!hostEnabled}
+            className="btn btn-neutral btn-sm flex-1"
+          >
+            nslookup
+          </button>
+          <button
+            onClick={() => openWindow("nettime")}
+            disabled={!hostEnabled}
+            className="btn btn-neutral btn-sm flex-1"
+          >
+            net time
+          </button>
+        </div>
+        <div className="flex gap-1 col-span-2 *:h-full">
+          <button
+            onClick={launchMsra}
+            disabled={!hostEnabled}
+            className="btn btn-info btn-sm flex-1"
+          >
+            msra
+          </button>
+          <button
+            onClick={launchVnc}
+            disabled={!hostEnabled}
+            className="btn btn-accent btn-sm flex-1"
+          >
+            vnc
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-1">
