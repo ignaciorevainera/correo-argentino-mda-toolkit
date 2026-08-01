@@ -44,7 +44,7 @@ export default function CommandView() {
   const title = params.get("title") || "Resultado";
   const command = params.get("command") || "";
 
-  const { execute, loading, lines, exitCode, error } = useCommandStream();
+  const { execute, stop, loading, lines, exitCode, error } = useCommandStream();
   const executedRef = useRef(false);
 
   useEffect(() => {
@@ -85,6 +85,15 @@ export default function CommandView() {
           <span data-tauri-drag-region className="text-xs font-mono text-base-content/50 truncate">{command}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
+          {loading && (
+            <button
+              onClick={stop}
+              className="btn btn-error btn-xs"
+              aria-label="Detener comando"
+            >
+              Detener
+            </button>
+          )}
           <button
             onClick={handleCopy}
             className="btn btn-ghost btn-xs"
@@ -113,7 +122,7 @@ export default function CommandView() {
         <div className="text-xs text-error bg-error/10 px-2 py-1 rounded">{error}</div>
       )}
 
-      {type === "ping" && !loading && results.length > 0 && (
+      {type === "ping" && results.length > 0 && (
         <div className="flex flex-col gap-0.5 overflow-y-auto">
           {results.map((r, i) => (
             <PingBar key={i} result={r} maxMs={maxMs} />
