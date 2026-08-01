@@ -1,7 +1,9 @@
 use encoding_rs::WINDOWS_1252;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::os::windows::process::CommandExt;
 use std::process::Command as StdCommand;
+use std::sync::{Arc, Mutex};
 use tauri::{menu::{Menu, MenuItem}, tray::TrayIconBuilder, Emitter, Manager};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
@@ -32,6 +34,16 @@ fn decode_windows_output(bytes: Vec<u8>) -> String {
 }
 
 const CREATE_NO_WINDOW: u32 = 0x08000000;
+
+type PidMap = Arc<Mutex<HashMap<String, u32>>>;
+
+fn kill_process_tree(pid: u32) -> std::io::Result<std::process::ExitStatus> {
+    StdCommand::new("taskkill")
+        .creation_flags(CREATE_NO_WINDOW)
+        .args(["/F", "/T", "/PID", &pid.to_string()])
+        .spawn()?
+        .wait()
+}
 
 fn spawn_cmd(command: &str) -> std::io::Result<tokio::process::Child> {
     Command::new("cmd")
@@ -75,10 +87,15 @@ async fn stream_output<R: tokio::io::AsyncRead + Unpin>(
 #[tauri::command]
 async fn run_command_stream(
     window: tauri::Window,
+    state: tauri::State<'_, PidMap>,
     id: String,
     command: String,
 ) -> Result<(), String> {
     let mut child = spawn_cmd(&command).map_err(|e| format!("Failed to spawn: {}", e))?;
+
+    if let Some(pid) = child.id() {
+        state.lock().unwrap().insert(id.clone(), pid);
+    }
 
     let stdout = child
         .stdout
@@ -109,6 +126,8 @@ async fn run_command_stream(
         .await
         .map_err(|e| format!("Wait error: {}", e))?;
 
+    state.lock().unwrap().remove(&id);
+
     let _ = window.emit(
         "command-done",
         StreamDonePayload {
@@ -117,6 +136,18 @@ async fn run_command_stream(
         },
     );
 
+    Ok(())
+}
+
+#[tauri::command]
+async fn stop_command_stream(
+    state: tauri::State<'_, PidMap>,
+    id: String,
+) -> Result<(), String> {
+    let pid = state.lock().unwrap().remove(&id);
+    if let Some(pid) = pid {
+        kill_process_tree(pid).map_err(|e| format!("Failed to kill process: {}", e))?;
+    }
     Ok(())
 }
 
@@ -134,9 +165,14 @@ fn run_msra_offer(hostname: String) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![run_command_stream, run_msra_offer])
+        .invoke_handler(tauri::generate_handler![
+            run_command_stream,
+            stop_command_stream,
+            run_msra_offer
+        ])
         
         .setup(|app| {
+            app.manage(Arc::new(Mutex::new(HashMap::<String, u32>::new())));
             app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
             #[cfg(desktop)]
             {
@@ -205,6 +241,18 @@ mod tests {
         let output = child.wait_with_output().await.expect("wait must succeed");
         assert!(output.status.success());
         assert_eq!(String::from_utf8_lossy(&output.stderr).trim(), "err-ok");
+    }
+
+    #[tokio::test]
+    async fn kill_process_tree_terminates_infinite_ping() {
+        let mut child = spawn_cmd("ping -t 127.0.0.1").expect("cmd must spawn");
+        let pid = child.id().expect("pid must exist");
+
+        let kill_status = kill_process_tree(pid).expect("taskkill must run");
+        assert!(kill_status.success(), "taskkill must exit 0");
+
+        let status = child.wait().await.expect("wait must succeed");
+        assert!(!status.success(), "killed process must not exit successfully");
     }
 }
 
