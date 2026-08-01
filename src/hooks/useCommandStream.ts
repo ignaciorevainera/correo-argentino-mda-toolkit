@@ -10,6 +10,7 @@ export function useCommandStream() {
   const [error, setError] = useState<string | null>(null);
   const unlistenRef = useRef<(() => void)[]>([]);
   const mountedRef = useRef(true);
+  const runIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -29,6 +30,7 @@ export function useCommandStream() {
     unlistenRef.current = [];
 
     const runId = `cmd-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    runIdRef.current = runId;
 
     const unlistenLine = await listen<StreamLinePayload>("command-line", (event) => {
       if (event.payload.id === runId && mountedRef.current) {
@@ -40,6 +42,7 @@ export function useCommandStream() {
       if (event.payload.id === runId && mountedRef.current) {
         setExitCode(event.payload.exit_code);
         setLoading(false);
+        runIdRef.current = null;
         unlistenLine();
         unlistenDone();
       }
@@ -53,11 +56,18 @@ export function useCommandStream() {
       if (mountedRef.current) {
         setError(err instanceof Error ? err.message : String(err));
         setLoading(false);
+        runIdRef.current = null;
         unlistenLine();
         unlistenDone();
       }
     }
   }, [loading]);
 
-  return { execute, loading, lines, exitCode, error };
+  const stop = useCallback(async () => {
+    const id = runIdRef.current;
+    if (!id) return;
+    await invoke("stop_command_stream", { id });
+  }, []);
+
+  return { execute, stop, loading, lines, exitCode, error };
 }
