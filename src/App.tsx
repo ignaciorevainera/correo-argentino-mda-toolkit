@@ -44,7 +44,7 @@ function octetIp(hostname: string, octet: string): string {
   return lastDot > 0 ? hostname.slice(0, lastDot) + "." + octet : hostname;
 }
 
-type ActionType = "ping" | "router" | "server" | "ping-t" | "router-t" | "server-t" | "nslookup" | "nettime" | "netuser";
+type ActionType = "ping" | "router" | "server" | "ping-t" | "router-t" | "server-t" | "nslookup" | "nettime" | "netuser" | "ipconfig" | "tracert";
 
 function actionConfig(type: ActionType, hostname: string, username: string) {
   switch (type) {
@@ -66,6 +66,10 @@ function actionConfig(type: ActionType, hostname: string, username: string) {
       return { type: "text" as const, title: `net time — ${hostname}`, command: `net time \\\\${hostname}` };
     case "netuser":
       return { type: "text" as const, title: `net user /domain — ${username}`, command: `net user ${username} /domain` };
+    case "ipconfig":
+      return { type: "text" as const, title: `ipconfig — ${hostname}`, command: `psexec \\\\${hostname} -s ipconfig /all` };
+    case "tracert":
+      return { type: "text" as const, title: `tracert — ${hostname}`, command: `tracert -d ${hostname}` };
   }
 }
 
@@ -134,6 +138,8 @@ function App() {
         "6": () => openWindow("nettime"),
         "7": () => launchMsra(),
         "8": () => launchVnc(),
+        "9": () => openWindow("ipconfig"),
+        "0": () => openWindow("tracert"),
       };
 
       const action = keyActions[e.key];
@@ -365,6 +371,22 @@ function App() {
             className="btn btn-accent btn-sm flex-1"
           >
             vnc
+          </button>
+        </div>
+        <div className="flex gap-1 col-span-2 *:h-full">
+          <button
+            onClick={() => openWindow("ipconfig")}
+            disabled={!hostEnabled}
+            className="btn btn-neutral btn-sm flex-1"
+          >
+            ipconfig
+          </button>
+          <button
+            onClick={() => openWindow("tracert")}
+            disabled={!hostEnabled}
+            className="btn btn-neutral btn-sm flex-1"
+          >
+            tracert
           </button>
         </div>
       </div>
