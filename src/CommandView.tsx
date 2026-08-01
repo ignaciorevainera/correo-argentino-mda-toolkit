@@ -79,18 +79,27 @@ export default function CommandView() {
 
   return (
     <div className="h-screen flex flex-col bg-base-100 text-base-content p-3 gap-2">
-      <div data-tauri-drag-region className="flex items-start justify-between shrink-0 gap-2">
-        <div data-tauri-drag-region className="min-w-0 flex flex-col">
-          <h1 className="text-sm font-semibold text-secondary truncate">{title}</h1>
-          <span className="text-xs font-mono text-base-content/50 truncate">{command}</span>
+      <div data-tauri-drag-region className="flex items-start justify-between shrink-0 gap-2 select-none">
+        <div data-tauri-drag-region className="min-w-0 flex flex-col select-none">
+          <h1 data-tauri-drag-region className="text-sm font-semibold text-secondary truncate">{title}</h1>
+          <span data-tauri-drag-region className="text-xs font-mono text-base-content/50 truncate">{command}</span>
         </div>
-        <button
-          onClick={handleCopy}
-          className="btn btn-ghost btn-xs shrink-0"
-          aria-label="Copiar al portapapeles"
-        >
-          {copied ? "Copiado" : "Copiar"}
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={handleCopy}
+            className="btn btn-ghost btn-xs"
+            aria-label="Copiar al portapapeles"
+          >
+            {copied ? "Copiado" : "Copiar"}
+          </button>
+          <button
+            onClick={() => getCurrentWebviewWindow().close()}
+            className="btn btn-ghost btn-xs"
+            aria-label="Cerrar ventana"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {loading && (

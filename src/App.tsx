@@ -141,7 +141,8 @@ function App() {
         width: 600,
         height: 400,
         title: cfg.title,
-        resizable: true,
+        resizable: false,
+        maximizable: false,
         decorations: false,
       });
       win.once("tauri://error", (e: unknown) => {
