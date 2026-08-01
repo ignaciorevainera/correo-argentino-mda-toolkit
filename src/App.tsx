@@ -119,6 +119,34 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+      if (!hostEnabled) return;
+
+      const keyActions: Record<string, () => void> = {
+        "1": () => openWindow("ping"),
+        "2": () => openWindow("ping-t"),
+        "3": () => openWindow("router"),
+        "4": () => openWindow("server"),
+        "5": () => openWindow("nslookup"),
+        "6": () => openWindow("nettime"),
+        "7": () => launchMsra(),
+        "8": () => launchVnc(),
+      };
+
+      const action = keyActions[e.key];
+      if (action) {
+        e.preventDefault();
+        action();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  });
+
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
 
