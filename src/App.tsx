@@ -155,6 +155,13 @@ function App() {
 
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
+  const [alwaysOnTop, setAlwaysOnTop] = useState(() => localStorage.getItem("alwaysOnTop") === "true");
+
+  useEffect(() => {
+    const win = getCurrentWindow();
+    win.setAlwaysOnTop(alwaysOnTop);
+    localStorage.setItem("alwaysOnTop", String(alwaysOnTop));
+  }, [alwaysOnTop]);
 
   const { addHistory, handleKeyDown, resetIndex } = useInputHistory(setHostname, 20);
 
@@ -280,6 +287,8 @@ function App() {
             openWindow("ping");
           }
         }} 
+        alwaysOnTop={alwaysOnTop}
+        onToggleAlwaysOnTop={() => setAlwaysOnTop(prev => !prev)}
       />
 
       {status && (

@@ -2,12 +2,16 @@ interface GlobalHeaderProps {
   hostname: string;
   onHostnameChange: (hostname: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  alwaysOnTop: boolean;
+  onToggleAlwaysOnTop: () => void;
 }
 
 export default function GlobalHeader({
   hostname,
   onHostnameChange,
   onKeyDown,
+  alwaysOnTop,
+  onToggleAlwaysOnTop,
 }: GlobalHeaderProps) {
   return (
     <div className="w-full">
@@ -23,6 +27,14 @@ export default function GlobalHeader({
           autoComplete="off"
           autoFocus
         />
+        <button
+          onClick={onToggleAlwaysOnTop}
+          className={`btn btn-sm btn-square btn-ghost ${alwaysOnTop ? "text-warning" : "text-base-content/30"}`}
+          title={alwaysOnTop ? "Desactivar siempre visible" : "Activar siempre visible"}
+          aria-label="Toggle siempre visible"
+        >
+          📌
+        </button>
       </div>
     </div>
   );
