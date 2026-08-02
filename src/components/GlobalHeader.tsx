@@ -4,6 +4,8 @@ interface GlobalHeaderProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   alwaysOnTop: boolean;
   onToggleAlwaysOnTop: () => void;
+  dark: boolean;
+  onToggleDark: () => void;
 }
 
 export default function GlobalHeader({
@@ -12,6 +14,8 @@ export default function GlobalHeader({
   onKeyDown,
   alwaysOnTop,
   onToggleAlwaysOnTop,
+  dark,
+  onToggleDark,
 }: GlobalHeaderProps) {
   return (
     <div className="w-full">
@@ -34,6 +38,14 @@ export default function GlobalHeader({
           aria-label="Toggle siempre visible"
         >
           📌
+        </button>
+        <button
+          onClick={onToggleDark}
+          className="btn btn-sm btn-square btn-ghost text-base-content/30"
+          title={dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
+          aria-label="Toggle tema"
+        >
+          {dark ? "☀️" : "🌙"}
         </button>
       </div>
     </div>

@@ -163,6 +163,14 @@ function App() {
     localStorage.setItem("alwaysOnTop", String(alwaysOnTop));
   }, [alwaysOnTop]);
 
+  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "mda-dark");
+
+  useEffect(() => {
+    const theme = dark ? "mda-dark" : "mda";
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [dark]);
+
   const { addHistory, handleKeyDown, resetIndex } = useInputHistory(setHostname, 20);
 
   const showStatus = useCallback((msg: string, type: "error" | "ok") => {
@@ -271,10 +279,7 @@ function App() {
   };
 
   return (
-    <div
-      className="h-screen flex flex-col gap-2 bg-base-100 p-2 text-base-content"
-      data-theme="mda"
-    >
+    <div className="h-screen flex flex-col gap-2 bg-base-100 p-2 text-base-content">
       <GlobalHeader 
         hostname={hostname} 
         onHostnameChange={(val) => {
@@ -289,6 +294,8 @@ function App() {
         }} 
         alwaysOnTop={alwaysOnTop}
         onToggleAlwaysOnTop={() => setAlwaysOnTop(prev => !prev)}
+        dark={dark}
+        onToggleDark={() => setDark(prev => !prev)}
       />
 
       {status && (
