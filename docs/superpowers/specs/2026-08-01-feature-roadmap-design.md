@@ -211,7 +211,7 @@ async fn close_all_results(app: tauri::AppHandle) -> Result<(), String> {
 
 ---
 
-## 9. ~~Completado~~ Modo siempre visible (on-top)
+## ~~9. Modo siempre visible (on-top)~~ (Completado)
 
 **Que es:** Toggle para mantener la ventana principal siempre encima de otras ventanas.
 
@@ -227,7 +227,7 @@ async fn close_all_results(app: tauri::AppHandle) -> Result<(), String> {
 
 ---
 
-## 10. ~~Completado~~ Toggle tema oscuro
+## ~~10. Toggle tema oscuro~~ (Completado)
 
 **Que es:** Switch o boton para alternar entre tema `mda` (claro) y `mda-dark` (oscuro).
 
@@ -251,7 +251,7 @@ useEffect(() => {
 
 ---
 
-## 11. ~~Completado~~ Sonido en ping -t al recuperar host
+## ~~11. Sonido en ping -t al recuperar host~~ (Completado)
 
 **Que es:** Beep audible cuando un host previamente caido vuelve a responder en ping -t. Util para monitoreo pasivo.
 
