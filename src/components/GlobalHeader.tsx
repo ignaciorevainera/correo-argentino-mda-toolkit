@@ -1,3 +1,5 @@
+import { Icon } from "@iconify/react";
+
 interface GlobalHeaderProps {
   hostname: string;
   onHostnameChange: (hostname: string) => void;
@@ -37,7 +39,7 @@ export default function GlobalHeader({
           title={alwaysOnTop ? "Desactivar siempre visible" : "Activar siempre visible"}
           aria-label="Toggle siempre visible"
         >
-          📌
+          <Icon icon={alwaysOnTop ? "ph:push-pin-fill" : "ph:push-pin-slash-fill"} className="size-4" />
         </button>
         <button
           onClick={onToggleDark}
@@ -45,7 +47,7 @@ export default function GlobalHeader({
           title={dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
           aria-label="Toggle tema"
         >
-          {dark ? "☀️" : "🌙"}
+          <Icon icon={dark ? "ph:sun-fill" : "ph:moon-fill"} className="size-4" />
         </button>
       </div>
     </div>
