@@ -5,6 +5,33 @@ import { useCommandStream } from "./hooks/useCommandStream";
 import { parsePingOutput } from "./utils/pingParser";
 import type { PingResult } from "./utils/pingParser";
 
+const playRecoveryBeep = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+
+    osc.onended = () => {
+      ctx.close().catch(() => {});
+    };
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.15); // 150ms duration
+  } catch {
+    // Ignore audio errors
+  }
+};
+
 interface PingBarProps {
   result: PingResult;
   maxMs: number;
@@ -66,6 +93,32 @@ export default function CommandView() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const prevHadTimeout = useRef(false);
+
+  useEffect(() => {
+    if (!loading || lines.length === 0) return;
+    
+    // Only apply this logic for continuous ping
+    if (!title.includes("ping -t")) return;
+
+    const last = lines[lines.length - 1];
+    if (!last) return;
+
+    // Detect timeout in Spanish ("Tiempo de espera agotado") or English ("Request timed out")
+    const hasTimeout = /(tiempo|time).*(agotado|out)/i.test(last);
+    
+    // If it's NOT a timeout, BUT the previous line WAS a timeout, the host recovered
+    // We also verify it's a successful reply by checking for "ms" or "TTL"
+    const isReply = /(ms|ttl)/i.test(last);
+    
+    if (!hasTimeout && isReply && prevHadTimeout.current) {
+      playRecoveryBeep();
+    }
+    
+    // Update ref for the next line
+    prevHadTimeout.current = hasTimeout;
+  }, [lines, loading, title]);
 
   const handleCopy = async () => {
     await writeText(lines.join("\n"));
