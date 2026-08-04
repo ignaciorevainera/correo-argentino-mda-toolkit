@@ -366,8 +366,10 @@ function App() {
             onClick={launchVnc}
             disabled={!hostEnabled}
             className="btn btn-accent btn-sm flex-1"
+            title="UltraVNC a equipos Ubuntu/Debian (puerto 5901)"
+            aria-label="UltraVNC Ubuntu/Debian"
           >
-            vnc
+            vnc :5901
           </button>
         </div>
         <div className="flex gap-1 col-span-2 *:h-full">
