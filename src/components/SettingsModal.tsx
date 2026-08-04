@@ -9,11 +9,11 @@ import {
 } from "../utils/settings";
 
 const THEMES = [
-  { value: "mda",       label: "Claro" },
-  { value: "mda-dark",  label: "Oscuro" },
+  { value: "mda", label: "Claro" },
+  { value: "mda-dark", label: "Oscuro" },
   { value: "cyberpunk", label: "Cyberpunk" },
-  { value: "retro",     label: "Retro" },
-  { value: "aqua",      label: "Aqua" },
+  { value: "retro", label: "Retro" },
+  { value: "aqua", label: "Aqua" },
 ] as const;
 
 const FONT_STEPS: FontSize[] = ["small", "normal", "large"];
@@ -41,12 +41,16 @@ export function SettingsModal() {
     applySettingsToDOM(settings);
   }, [settings]);
 
-  const updateSetting = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+  const updateSetting = <K extends keyof AppSettings>(
+    key: K,
+    value: AppSettings[K],
+  ) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
   };
 
   const fontSizeIndex = FONT_STEPS.indexOf(settings.fontSize);
-  const handleFontSlider = (v: number) => updateSetting("fontSize", FONT_STEPS[v]);
+  const handleFontSlider = (v: number) =>
+    updateSetting("fontSize", FONT_STEPS[v]);
 
   const factoryReset = () => {
     localStorage.clear();
@@ -65,7 +69,7 @@ export function SettingsModal() {
       </button>
 
       <dialog ref={modalRef} className="modal text-base-content">
-        <div className="modal-box w-11/12 max-w-sm p-5">
+        <div className="modal-box w-11/12 max-w-sm max-h-3/4 p-5">
           <h3 className="font-semibold text-sm text-base-content/50 uppercase tracking-wider mb-4">
             Ajustes
           </h3>
@@ -93,7 +97,10 @@ export function SettingsModal() {
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm">
-                <Icon icon="ph:layout" className="size-4 text-base-content/50" />
+                <Icon
+                  icon="ph:layout"
+                  className="size-4 text-base-content/50"
+                />
                 <span>Densidad</span>
               </div>
               <div className="join">
@@ -116,11 +123,17 @@ export function SettingsModal() {
 
             <div>
               <div className="flex items-center gap-2 text-sm mb-2">
-                <Icon icon="ph:text-aa" className="size-4 text-base-content/50" />
+                <Icon
+                  icon="ph:text-aa"
+                  className="size-4 text-base-content/50"
+                />
                 <span>Tamaño de fuente</span>
               </div>
               <div className="flex items-center gap-2">
-                <Icon icon="ph:text-t" className="size-3 text-base-content/40" />
+                <Icon
+                  icon="ph:text-t"
+                  className="size-3 text-base-content/40"
+                />
                 <input
                   type="range"
                   min={0}
@@ -130,10 +143,15 @@ export function SettingsModal() {
                   onChange={(e) => handleFontSlider(Number(e.target.value))}
                   className="range range-xs flex-1"
                 />
-                <Icon icon="ph:text-t" className="size-5 text-base-content/40" />
+                <Icon
+                  icon="ph:text-t"
+                  className="size-5 text-base-content/40"
+                />
               </div>
               <div className="flex justify-between px-1 mt-0.5">
-                <span className="text-[10px] text-base-content/40">Pequeño</span>
+                <span className="text-[10px] text-base-content/40">
+                  Pequeño
+                </span>
                 <span className="text-[10px] text-base-content/40">Normal</span>
                 <span className="text-[10px] text-base-content/40">Grande</span>
               </div>
@@ -142,27 +160,37 @@ export function SettingsModal() {
             <div className="flex flex-col gap-2">
               <label className="flex items-center justify-between cursor-pointer">
                 <div className="flex items-center gap-2 text-sm">
-                  <Icon icon="ph:film-strip" className="size-4 text-base-content/50" />
+                  <Icon
+                    icon="ph:film-strip"
+                    className="size-4 text-base-content/50"
+                  />
                   <span>Reducir animaciones</span>
                 </div>
                 <input
                   type="checkbox"
                   className="toggle toggle-xs"
                   checked={settings.reduceMotion}
-                  onChange={(e) => updateSetting("reduceMotion", e.target.checked)}
+                  onChange={(e) =>
+                    updateSetting("reduceMotion", e.target.checked)
+                  }
                 />
               </label>
 
               <label className="flex items-center justify-between cursor-pointer">
                 <div className="flex items-center gap-2 text-sm">
-                  <Icon icon="ph:push-pin" className="size-4 text-base-content/50" />
+                  <Icon
+                    icon="ph:push-pin"
+                    className="size-4 text-base-content/50"
+                  />
                   <span>Ventana siempre arriba</span>
                 </div>
                 <input
                   type="checkbox"
                   className="toggle toggle-xs toggle-primary"
                   checked={settings.alwaysOnTop}
-                  onChange={(e) => updateSetting("alwaysOnTop", e.target.checked)}
+                  onChange={(e) =>
+                    updateSetting("alwaysOnTop", e.target.checked)
+                  }
                 />
               </label>
             </div>
