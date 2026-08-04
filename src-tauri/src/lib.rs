@@ -167,6 +167,17 @@ fn run_msra_offer(hostname: String) -> Result<(), String> {
     Ok(())
 }
 
+const VNC_PORT: u16 = 5901;
+const VNC_PASSWORD: &str = "d9abf665";
+
+fn build_vnc_args(hostname: &str) -> Vec<String> {
+    vec![
+        format!("{}::{}", hostname, VNC_PORT),
+        "-password".to_string(),
+        VNC_PASSWORD.to_string(),
+    ]
+}
+
 #[tauri::command]
 fn run_vnc(hostname: String) -> Result<(), String> {
     StdCommand::new("vncviewer.exe")
@@ -286,6 +297,27 @@ mod tests {
 
         let status = child.wait().await.expect("wait must succeed");
         assert!(!status.success(), "killed process must not exit successfully");
+    }
+
+    #[test]
+    fn build_vnc_args_uses_port_5901_and_password() {
+        let args = build_vnc_args("10.20.30.40");
+        assert_eq!(
+            args,
+            vec![
+                "10.20.30.40::5901".to_string(),
+                "-password".to_string(),
+                "d9abf665".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn build_vnc_args_preserves_qualified_hostname() {
+        let args = build_vnc_args("pc-123.correo.local");
+        assert_eq!(args[0], "pc-123.correo.local::5901");
+        assert_eq!(args[1], "-password");
+        assert_eq!(args[2], "d9abf665");
     }
 }
 
