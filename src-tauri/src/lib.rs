@@ -182,7 +182,7 @@ fn build_vnc_args(hostname: &str) -> Vec<String> {
 fn run_vnc(hostname: String) -> Result<(), String> {
     StdCommand::new("vncviewer.exe")
         .creation_flags(CREATE_NO_WINDOW)
-        .arg(&hostname)
+        .args(build_vnc_args(&hostname))
         .spawn()
         .map_err(|e| format!("No se pudo abrir VNC Viewer: {}", e))?;
     Ok(())
@@ -318,6 +318,14 @@ mod tests {
         assert_eq!(args[0], "pc-123.correo.local::5901");
         assert_eq!(args[1], "-password");
         assert_eq!(args[2], "d9abf665");
+    }
+
+    #[test]
+    fn run_vnc_command_uses_helper_args() {
+        let args = build_vnc_args("192.168.1.10");
+        assert_eq!(args[0], "192.168.1.10::5901");
+        assert_eq!(args[1], "-password");
+        assert!(!args[2].is_empty());
     }
 }
 
