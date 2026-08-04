@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { useNotification } from "./contexts/NotificationContext";
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
@@ -154,14 +155,10 @@ function App() {
   });
 
   const [username, setUsername] = useState("");
-  const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
 
   const { addHistory, handleKeyDown, resetIndex } = useInputHistory(setHostname, 20);
 
-  const showStatus = useCallback((msg: string, type: "error" | "ok") => {
-    setStatus({ msg, type });
-    setTimeout(() => setStatus(null), 4000);
-  }, []);
+  const { showNotification } = useNotification();
 
   const trimmedHost = hostname.trim();
   const trimmedUser = username.trim();
@@ -172,7 +169,7 @@ function App() {
     const classification = classifyIpInput(trimmedHost);
 
     if (classification.kind === "invalid-ip" && type !== "netuser") {
-      showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
+      showNotification({ title: "Dirección IP inválida", message: `El valor ingresado no es una IP válida: ${classification.value}`, type: "error" });
       return;
     }
 
@@ -191,7 +188,7 @@ function App() {
       try {
         effectiveHost = await invoke<string>("resolve_host", { hostname: targetHost });
       } catch (err) {
-        showStatus(err instanceof Error ? err.message : String(err), "error");
+        showNotification({ title: "Error de resolución DNS", message: err instanceof Error ? err.message : String(err), type: "error" });
         return;
       }
     }
@@ -214,10 +211,10 @@ function App() {
         const msg = e instanceof Object && "payload" in (e as object)
           ? String((e as { payload: unknown }).payload)
           : String(e);
-        showStatus(`Error al crear ventana: ${msg}`, "error");
+        showNotification({ title: "Error al crear ventana", message: msg, type: "error" });
       });
     } catch (err) {
-      showStatus(`Error al abrir ventana: ${err instanceof Error ? err.message : String(err)}`, "error");
+      showNotification({ title: "Error al abrir ventana", message: err instanceof Error ? err.message : String(err), type: "error" });
     }
   };
 
@@ -225,7 +222,7 @@ function App() {
     const classification = classifyIpInput(trimmedHost);
 
     if (classification.kind === "invalid-ip") {
-      showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
+      showNotification({ title: "Dirección IP inválida", message: `El valor ingresado no es una IP válida: ${classification.value}`, type: "error" });
       return;
     }
 
@@ -238,7 +235,7 @@ function App() {
     try {
       await invoke("run_msra_offer", { hostname: targetHost });
     } catch (err) {
-      showStatus(err instanceof Error ? err.message : String(err), "error");
+      showNotification({ title: "Error al ejecutar msra", message: err instanceof Error ? err.message : String(err), type: "error" });
     }
   };
 
@@ -246,7 +243,7 @@ function App() {
     const classification = classifyIpInput(trimmedHost);
 
     if (classification.kind === "invalid-ip") {
-      showStatus(`Dirección IP incompleta o inválida: ${classification.value}`, "error");
+      showNotification({ title: "Dirección IP inválida", message: `El valor ingresado no es una IP válida: ${classification.value}`, type: "error" });
       return;
     }
 
@@ -259,7 +256,7 @@ function App() {
     try {
       await invoke("run_vnc", { hostname: targetHost });
     } catch (err) {
-      showStatus(err instanceof Error ? err.message : String(err), "error");
+      showNotification({ title: "Error al ejecutar VNC", message: err instanceof Error ? err.message : String(err), type: "error" });
     }
   };
 
@@ -278,12 +275,6 @@ function App() {
           }
         }} 
       />
-
-      {status && (
-        <div className={`text-xs px-2 py-1 rounded ${status.type === "error" ? "bg-error/10 text-error" : "bg-success/10 text-success"}`}>
-          {status.msg}
-        </div>
-      )}
 
       <div className="grid grid-cols-2 gap-1 grow *:h-full">
         <div className="flex gap-1 *:h-full">
