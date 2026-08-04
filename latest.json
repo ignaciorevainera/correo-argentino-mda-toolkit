@@ -1,11 +1,11 @@
 {
-  "version": "0.3.0",
+  "version": "0.1.0",
   "notes": "- ErrorBoundary global para errores de renderizado\n- Feedback visible al fallar creación de ventanas popup\n- Permiso core:webview agregado para popups en producción\n- Versiones sincronizadas en todos los archivos de configuración",
   "pub_date": "2026-07-26T00:00:00Z",
   "platforms": {
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUL3dlM0J6YXhZNEFvVjlMK1BacXBtRDV1Tjloc1NwS0d5MEpTZVBNUTVnYVU1ZnQyZWNvQzBzcE1VU0xwai9pbXFEZXFSWGMwNkRmTG1UcGprbnM4NHpmak4vRTFzUlFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1MTA4MzczCWZpbGU6Y29ycmVvLWFyZ2VudGluby1tZGEtdG9vbGtpdF8wLjIuMF94NjRfZXMtRVMubXNpCjh1dk9UclVtai84RUdIMjIzSmpnUjc3cFNBZG1tVEd5ODYrUjhHSFpYQjJOTjRON256U1EvSEIvS3g2dEdocHpKRkhORUVXMS80YXByb1V1STRzVERBPT0K",
-      "url": "https://github.com/ignaciorevainera/correo-argentino-mda-toolkit/releases/download/v0.3.0/correo-argentino-mda-toolkit_0.3.0_x64_es-ES.msi"
+      "url": "https://github.com/ignaciorevainera/correo-argentino-mda-toolkit/releases/download/v0.1.0/correo-argentino-mda-toolkit_0.1.0_x64_es-ES.msi"
     }
   }
 }
