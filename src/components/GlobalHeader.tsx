@@ -1,23 +1,15 @@
-import { Icon } from "@iconify/react";
+import { SettingsModal } from "./SettingsModal";
 
 interface GlobalHeaderProps {
   hostname: string;
   onHostnameChange: (hostname: string) => void;
   onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  alwaysOnTop: boolean;
-  onToggleAlwaysOnTop: () => void;
-  dark: boolean;
-  onToggleDark: () => void;
 }
 
 export default function GlobalHeader({
   hostname,
   onHostnameChange,
   onKeyDown,
-  alwaysOnTop,
-  onToggleAlwaysOnTop,
-  dark,
-  onToggleDark,
 }: GlobalHeaderProps) {
   return (
     <div className="w-full">
@@ -33,23 +25,10 @@ export default function GlobalHeader({
           autoComplete="off"
           autoFocus
         />
-        <button
-          onClick={onToggleAlwaysOnTop}
-          className={`btn btn-sm btn-square btn-ghost ${alwaysOnTop ? "text-warning" : "text-base-content/30"}`}
-          title={alwaysOnTop ? "Desactivar siempre visible" : "Activar siempre visible"}
-          aria-label="Toggle siempre visible"
-        >
-          <Icon icon={alwaysOnTop ? "ph:push-pin-fill" : "ph:push-pin-slash-fill"} className="size-4" />
-        </button>
-        <button
-          onClick={onToggleDark}
-          className="btn btn-sm btn-square btn-ghost text-base-content/30"
-          title={dark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
-          aria-label="Toggle tema"
-        >
-          <Icon icon={dark ? "ph:sun-fill" : "ph:moon-fill"} className="size-4" />
-        </button>
+        <SettingsModal />
       </div>
     </div>
   );
 }
+
+

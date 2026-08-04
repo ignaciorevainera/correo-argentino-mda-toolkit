@@ -76,3 +76,42 @@
   --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
 }
+
+/* Density Adjustments */
+html[data-density="compact"] {
+  --size-field: 0.15rem;
+  --size-selector: 0.15rem;
+  font-size: 14px;
+}
+
+html[data-density="normal"] {
+  font-size: 16px;
+}
+
+/* Text Size Adjustments */
+html[data-text-size="large"] {
+  font-size: 18px;
+}
+
+html[data-density="compact"][data-text-size="large"] {
+  font-size: 16px;
+}
+
+html[data-text-size="small"] {
+  font-size: 13px;
+}
+
+html[data-density="compact"][data-text-size="small"] {
+  font-size: 12px;
+}
+
+/* Reduced Motion */
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+

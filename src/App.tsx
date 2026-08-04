@@ -155,21 +155,6 @@ function App() {
 
   const [username, setUsername] = useState("");
   const [status, setStatus] = useState<{ msg: string; type: "error" | "ok" } | null>(null);
-  const [alwaysOnTop, setAlwaysOnTop] = useState(() => localStorage.getItem("alwaysOnTop") === "true");
-
-  useEffect(() => {
-    const win = getCurrentWindow();
-    win.setAlwaysOnTop(alwaysOnTop);
-    localStorage.setItem("alwaysOnTop", String(alwaysOnTop));
-  }, [alwaysOnTop]);
-
-  const [dark, setDark] = useState(() => localStorage.getItem("theme") === "mda-dark");
-
-  useEffect(() => {
-    const theme = dark ? "mda-dark" : "mda";
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [dark]);
 
   const { addHistory, handleKeyDown, resetIndex } = useInputHistory(setHostname, 20);
 
@@ -292,10 +277,6 @@ function App() {
             openWindow("ping");
           }
         }} 
-        alwaysOnTop={alwaysOnTop}
-        onToggleAlwaysOnTop={() => setAlwaysOnTop(prev => !prev)}
-        dark={dark}
-        onToggleDark={() => setDark(prev => !prev)}
       />
 
       {status && (
