@@ -9,11 +9,42 @@ import {
 } from "../utils/settings";
 
 const THEMES = [
-  { value: "mda", label: "Claro" },
-  { value: "mda-dark", label: "Oscuro" },
-  { value: "cyberpunk", label: "Cyberpunk" },
+  { value: "mda", label: "Claro (MDA)" },
+  { value: "mda-dark", label: "Oscuro (MDA)" },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "cupcake", label: "Cupcake" },
+  { value: "bumblebee", label: "Bumblebee" },
+  { value: "emerald", label: "Emerald" },
+  { value: "corporate", label: "Corporate" },
+  { value: "synthwave", label: "Synthwave" },
   { value: "retro", label: "Retro" },
+  { value: "cyberpunk", label: "Cyberpunk" },
+  { value: "valentine", label: "Valentine" },
+  { value: "halloween", label: "Halloween" },
+  { value: "garden", label: "Garden" },
+  { value: "forest", label: "Forest" },
   { value: "aqua", label: "Aqua" },
+  { value: "lofi", label: "Lofi" },
+  { value: "pastel", label: "Pastel" },
+  { value: "fantasy", label: "Fantasy" },
+  { value: "wireframe", label: "Wireframe" },
+  { value: "black", label: "Black" },
+  { value: "luxury", label: "Luxury" },
+  { value: "dracula", label: "Dracula" },
+  { value: "cmyk", label: "CMYK" },
+  { value: "autumn", label: "Autumn" },
+  { value: "business", label: "Business" },
+  { value: "acid", label: "Acid" },
+  { value: "lemonade", label: "Lemonade" },
+  { value: "night", label: "Night" },
+  { value: "coffee", label: "Coffee" },
+  { value: "winter", label: "Winter" },
+  { value: "dim", label: "Dim" },
+  { value: "nord", label: "Nord" },
+  { value: "sunset", label: "Sunset" },
+  { value: "caramellate", label: "Caramellate" },
+  { value: "abyss", label: "Abyss" },
 ] as const;
 
 const FONT_STEPS: FontSize[] = ["small", "normal", "large"];
@@ -77,22 +108,17 @@ export function SettingsModal() {
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-xs text-base-content/50 mb-1.5">Tema</p>
-              <div className="flex flex-wrap gap-1">
+              <select
+                className="select select-bordered select-sm w-full max-w-xs"
+                value={settings.theme}
+                onChange={(e) => updateSetting("theme", e.target.value)}
+              >
                 {THEMES.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => updateSetting("theme", value)}
-                    className={`btn btn-xs rounded-full ${
-                      settings.theme === value
-                        ? "btn-primary"
-                        : "btn-ghost border border-base-content/20"
-                    }`}
-                  >
+                  <option key={value} value={value}>
                     {label}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
 
             <div className="flex items-center justify-between">
