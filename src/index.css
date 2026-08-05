@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: mda, mda-dark, cyberpunk, retro, aqua;
+  themes: mda, mda-dark, cyberpunk, retro, aqua, light, dark, cupcake, bumblebee, emerald, corporate, synthwave, valentine, halloween, garden, forest, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset, caramellate, abyss;
 }
 @import "@fontsource/geist-sans";
 @import "@fontsource/geist-mono";
