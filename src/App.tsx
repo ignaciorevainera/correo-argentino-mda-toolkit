@@ -8,6 +8,7 @@ import { register, unregister } from "@tauri-apps/plugin-global-shortcut";
 import { readText } from "@tauri-apps/plugin-clipboard-manager";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import GlobalHeader from "./components/GlobalHeader";
+import TitleBar from "./components/TitleBar";
 import { useInputHistory } from "./hooks/useInputHistory";
 import { classifyIpInput } from "./utils/ip";
 import { version } from "../package.json";
@@ -261,22 +262,24 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex flex-col gap-2 bg-base-100 p-2 text-base-content">
-      <GlobalHeader 
-        hostname={hostname} 
-        onHostnameChange={(val) => {
-          setHostname(val);
-          resetIndex();
-        }}
-        onKeyDown={(e) => {
-          handleKeyDown(e);
-          if (e.key === "Enter" && hostEnabled) {
-            openWindow("ping");
-          }
-        }} 
-      />
+    <div className="h-screen flex flex-col bg-base-100 text-base-content overflow-hidden">
+      <TitleBar title="MDA Toolkit" onClose={() => getCurrentWindow().hide()} />
+      <div className="flex-1 flex flex-col gap-2 p-2 min-h-0 overflow-y-auto">
+        <GlobalHeader 
+          hostname={hostname} 
+          onHostnameChange={(val) => {
+            setHostname(val);
+            resetIndex();
+          }}
+          onKeyDown={(e) => {
+            handleKeyDown(e);
+            if (e.key === "Enter" && hostEnabled) {
+              openWindow("ping");
+            }
+          }} 
+        />
 
-      <div className="grid grid-cols-2 gap-1 grow *:h-full">
+        <div className="grid grid-cols-2 gap-1 grow *:h-full">
         <div className="flex gap-1 *:h-full">
           <button
             onClick={() => openWindow("ping")}
@@ -401,6 +404,7 @@ function App() {
       <div className="flex justify-between items-center text-[9px] text-base-content/40 px-1 mt-auto select-none">
         <span></span>
         <span>v{version}</span>
+      </div>
       </div>
     </div>
   );

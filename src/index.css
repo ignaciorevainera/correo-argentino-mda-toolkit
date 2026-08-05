@@ -115,3 +115,8 @@ html[data-reduced-motion="true"] *::after {
   scroll-behavior: auto !important;
 }
 
+*[data-tauri-drag-region] {
+  app-region: drag;
+}
+
+

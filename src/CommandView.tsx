@@ -4,6 +4,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { useCommandStream } from "./hooks/useCommandStream";
 import { parsePingOutput } from "./utils/pingParser";
 import type { PingResult } from "./utils/pingParser";
+import TitleBar from "./components/TitleBar";
 
 const playRecoveryBeep = () => {
   try {
@@ -131,42 +132,36 @@ export default function CommandView() {
   const outputText = lines.join("\n");
   const hasOutput = lines.length > 0;
 
+  const handleClose = async () => {
+    await stop();
+    getCurrentWebviewWindow().close();
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-base-100 text-base-content p-3 gap-2">
-      <div data-tauri-drag-region className="flex items-start justify-between shrink-0 gap-2 select-none">
-        <div data-tauri-drag-region className="min-w-0 flex flex-col select-none">
-          <h1 data-tauri-drag-region className="text-sm font-semibold text-secondary truncate">{title}</h1>
-          <span data-tauri-drag-region className="text-xs font-mono text-base-content/50 truncate">{command}</span>
-        </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {loading && (
-            <button
-              onClick={stop}
-              className="btn btn-error btn-xs"
-              aria-label="Detener comando"
-            >
-              Detener
-            </button>
-          )}
+    <div className="h-screen flex flex-col bg-base-100 text-base-content overflow-hidden">
+      <TitleBar title={title} onClose={handleClose}>
+        {loading && (
           <button
-            onClick={handleCopy}
-            className="btn btn-ghost btn-xs"
-            aria-label="Copiar al portapapeles"
+            onClick={stop}
+            className="btn btn-error btn-xs"
+            aria-label="Detener comando"
           >
-            {copied ? "Copiado" : "Copiar"}
+            Detener
           </button>
-          <button
-            onClick={async () => {
-              await stop();
-              getCurrentWebviewWindow().close();
-            }}
-            className="btn btn-ghost btn-xs"
-            aria-label="Cerrar ventana"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
+        )}
+        <button
+          onClick={handleCopy}
+          className="btn btn-ghost btn-xs text-xs"
+          aria-label="Copiar al portapapeles"
+        >
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </TitleBar>
+
+      <div className="flex-1 flex flex-col gap-2 p-3 min-h-0 overflow-y-auto">
+        <span className="text-[10px] font-mono text-base-content/50 truncate -mt-2 px-1 select-none pointer-events-none">
+          {command}
+        </span>
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-base-content/50 py-2">
@@ -199,6 +194,7 @@ export default function CommandView() {
       {type === "ping" && !loading && !error && results.length === 0 && exitCode !== null && (
         <div className="text-sm text-base-content/40 italic py-4 text-center">Sin resultados</div>
       )}
+      </div>
     </div>
   );
 }
