@@ -8,6 +8,7 @@ export interface AppSettings {
   fontSize: FontSize;
   reduceMotion: boolean;
   alwaysOnTop: boolean;
+  globalShortcuts: boolean;
 }
 
 export const defaultSettings: AppSettings = {
@@ -16,6 +17,7 @@ export const defaultSettings: AppSettings = {
   fontSize: "normal",
   reduceMotion: false,
   alwaysOnTop: false,
+  globalShortcuts: true,
 };
 
 export function getSettings(): AppSettings {

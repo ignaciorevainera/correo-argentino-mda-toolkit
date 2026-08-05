@@ -10,6 +10,8 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import GlobalHeader from "./components/GlobalHeader";
 import TitleBar from "./components/TitleBar";
 import { useInputHistory } from "./hooks/useInputHistory";
+import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
+import { getSettings, AppSettings } from "./utils/settings";
 import { classifyIpInput } from "./utils/ip";
 import { version } from "../package.json";
 
@@ -79,6 +81,21 @@ function App() {
   useUpdater();
 
   const [hostname, setHostname] = useState("");
+  const [settings, setSettings] = useState<AppSettings>(getSettings());
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "app_settings" && e.newValue) {
+        try {
+          setSettings(JSON.parse(e.newValue));
+        } catch {
+          // ignore
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -166,16 +183,18 @@ function App() {
   const hostEnabled = trimmedHost.length > 0;
   const userEnabled = trimmedUser.length > 0;
 
-  const openWindow = async (type: ActionType) => {
-    const classification = classifyIpInput(trimmedHost);
+  const openWindow = async (type: ActionType, customHost?: string) => {
+    const rawHost = customHost !== undefined ? customHost : trimmedHost;
+    const hostToUse = rawHost.trim();
+    const classification = classifyIpInput(hostToUse);
 
     if (classification.kind === "invalid-ip" && type !== "netuser") {
       showNotification({ title: "Dirección IP inválida", message: `El valor ingresado no es una IP válida: ${classification.value}`, type: "error" });
       return;
     }
 
-    if (hostEnabled && type !== "netuser") {
-      addHistory(trimmedHost);
+    if (hostToUse.length > 0 && type !== "netuser") {
+      addHistory(hostToUse);
     }
     const targetHost = classification.kind === "ip" || classification.value.toLowerCase().endsWith(".correo.local")
       ? classification.value
@@ -218,6 +237,62 @@ function App() {
       showNotification({ title: "Error al abrir ventana", message: err instanceof Error ? err.message : String(err), type: "error" });
     }
   };
+
+  const handleGlobalShortcut = async (action: string, clipboardText: string) => {
+    const classification = classifyIpInput(clipboardText);
+
+    if (classification.kind === "invalid-ip") {
+      showNotification({
+        title: "Dirección IP inválida",
+        message: `El valor del portapapeles no es una IP válida: ${classification.value}`,
+        type: "error",
+      });
+      return;
+    }
+
+    const targetHost =
+      classification.kind === "ip" ||
+      classification.value.toLowerCase().endsWith(".correo.local")
+        ? classification.value
+        : `${classification.value}.correo.local`;
+
+    if (action === "F9") {
+      openWindow("ping", targetHost);
+    } else if (action === "F10") {
+      let effectiveHost = targetHost;
+      const isIp = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(targetHost);
+      if (!isIp) {
+        try {
+          effectiveHost = await invoke<string>("resolve_host", {
+            hostname: targetHost,
+          });
+        } catch (err) {
+          showNotification({
+            title: "Error de resolución DNS",
+            message: err instanceof Error ? err.message : String(err),
+            type: "error",
+          });
+          return;
+        }
+      }
+      openWindow("router", effectiveHost);
+    } else if (action === "F11") {
+      openWindow("nettime", targetHost);
+    } else if (action === "F12") {
+      addHistory(targetHost);
+      try {
+        await invoke("run_msra_offer", { hostname: targetHost });
+      } catch (err) {
+        showNotification({
+          title: "Error al ejecutar msra",
+          message: err instanceof Error ? err.message : String(err),
+          type: "error",
+        });
+      }
+    }
+  };
+
+  useGlobalShortcuts(settings.globalShortcuts, handleGlobalShortcut);
 
   const launchMsra = async () => {
     const classification = classifyIpInput(trimmedHost);
@@ -389,6 +464,11 @@ function App() {
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && userEnabled) {
+              openWindow("netuser");
+            }
+          }}
           placeholder="usuario de red"
           className="input input-sm w-full font-mono text-xs"
           autoComplete="off"

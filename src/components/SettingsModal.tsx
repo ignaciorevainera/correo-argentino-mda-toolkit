@@ -51,6 +51,7 @@ const FONT_STEPS: FontSize[] = ["small", "normal", "large"];
 
 export function SettingsModal() {
   const [settings, setSettings] = useState<AppSettings>(getSettings());
+  const [activeTab, setActiveTab] = useState<"general" | "shortcuts">("general");
   const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -59,7 +60,6 @@ export function SettingsModal() {
         try {
           setSettings(JSON.parse(e.newValue));
         } catch {
-          // ignore
         }
       }
     };
@@ -100,127 +100,213 @@ export function SettingsModal() {
       </button>
 
       <dialog ref={modalRef} className="modal text-base-content">
-        <div className="modal-box w-11/12 max-w-sm max-h-3/4 p-5">
-          <h3 className="font-semibold text-sm text-base-content/50 uppercase tracking-wider mb-4">
+        <div className="modal-box w-11/12 max-w-md max-h-3/4 p-5 flex flex-col">
+          <h3 className="font-semibold text-sm text-base-content/50 uppercase tracking-wider mb-3">
             Ajustes
           </h3>
 
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className="text-xs text-base-content/50 mb-1.5">Tema</p>
-              <select
-                className="select select-bordered select-sm w-full max-w-xs"
-                value={settings.theme}
-                onChange={(e) => updateSetting("theme", e.target.value)}
-              >
-                {THEMES.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div role="tablist" className="tabs tabs-border tabs-sm mb-4">
+            <button
+              type="button"
+              role="tab"
+              className={`tab ${activeTab === "general" ? "tab-active" : ""}`}
+              onClick={() => setActiveTab("general")}
+            >
+              General
+            </button>
+            <button
+              type="button"
+              role="tab"
+              className={`tab ${activeTab === "shortcuts" ? "tab-active" : ""}`}
+              onClick={() => setActiveTab("shortcuts")}
+            >
+              Atajos
+            </button>
+          </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm">
-                <Icon
-                  icon="ph:layout"
-                  className="size-4 text-base-content/50"
-                />
-                <span>Densidad</span>
-              </div>
-              <div className="join">
-                <button
-                  type="button"
-                  className={`join-item btn btn-xs ${settings.density === "compact" ? "btn-primary" : "btn-ghost border border-base-content/20"}`}
-                  onClick={() => updateSetting("density", "compact")}
+          {activeTab === "general" && (
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-xs text-base-content/50 mb-1.5">Tema</p>
+                <select
+                  className="select select-bordered select-sm w-full max-w-xs"
+                  value={settings.theme}
+                  onChange={(e) => updateSetting("theme", e.target.value)}
                 >
-                  Compacta
-                </button>
-                <button
-                  type="button"
-                  className={`join-item btn btn-xs ${settings.density === "normal" ? "btn-primary" : "btn-ghost border border-base-content/20"}`}
-                  onClick={() => updateSetting("density", "normal")}
-                >
-                  Normal
-                </button>
+                  {THEMES.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center gap-2 text-sm mb-2">
-                <Icon
-                  icon="ph:text-aa"
-                  className="size-4 text-base-content/50"
-                />
-                <span>Tamaño de fuente</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Icon
-                  icon="ph:text-t"
-                  className="size-3 text-base-content/40"
-                />
-                <input
-                  type="range"
-                  min={0}
-                  max={2}
-                  step={1}
-                  value={fontSizeIndex}
-                  onChange={(e) => handleFontSlider(Number(e.target.value))}
-                  className="range range-xs flex-1"
-                />
-                <Icon
-                  icon="ph:text-t"
-                  className="size-5 text-base-content/40"
-                />
-              </div>
-              <div className="flex justify-between px-1 mt-0.5">
-                <span className="text-[10px] text-base-content/40">
-                  Pequeño
-                </span>
-                <span className="text-[10px] text-base-content/40">Normal</span>
-                <span className="text-[10px] text-base-content/40">Grande</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <Icon
-                    icon="ph:film-strip"
+                    icon="ph:layout"
                     className="size-4 text-base-content/50"
                   />
-                  <span>Reducir animaciones</span>
+                  <span>Densidad</span>
                 </div>
-                <input
-                  type="checkbox"
-                  className="toggle toggle-xs"
-                  checked={settings.reduceMotion}
-                  onChange={(e) =>
-                    updateSetting("reduceMotion", e.target.checked)
-                  }
-                />
-              </label>
+                <div className="join">
+                  <button
+                    type="button"
+                    className={`join-item btn btn-xs ${settings.density === "compact" ? "btn-primary" : "btn-ghost border border-base-content/20"}`}
+                    onClick={() => updateSetting("density", "compact")}
+                  >
+                    Compacta
+                  </button>
+                  <button
+                    type="button"
+                    className={`join-item btn btn-xs ${settings.density === "normal" ? "btn-primary" : "btn-ghost border border-base-content/20"}`}
+                    onClick={() => updateSetting("density", "normal")}
+                  >
+                    Normal
+                  </button>
+                </div>
+              </div>
 
+              <div>
+                <div className="flex items-center gap-2 text-sm mb-2">
+                  <Icon
+                    icon="ph:text-aa"
+                    className="size-4 text-base-content/50"
+                  />
+                  <span>Tamaño de fuente</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon
+                    icon="ph:text-t"
+                    className="size-3 text-base-content/40"
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={2}
+                    step={1}
+                    value={fontSizeIndex}
+                    onChange={(e) => handleFontSlider(Number(e.target.value))}
+                    className="range range-xs flex-1"
+                  />
+                  <Icon
+                    icon="ph:text-t"
+                    className="size-5 text-base-content/40"
+                  />
+                </div>
+                <div className="flex justify-between px-1 mt-0.5">
+                  <span className="text-[10px] text-base-content/40">
+                    Pequeño
+                  </span>
+                  <span className="text-[10px] text-base-content/40">Normal</span>
+                  <span className="text-[10px] text-base-content/40">Grande</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Icon
+                      icon="ph:film-strip"
+                      className="size-4 text-base-content/50"
+                    />
+                    <span>Reducir animaciones</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-xs"
+                    checked={settings.reduceMotion}
+                    onChange={(e) =>
+                      updateSetting("reduceMotion", e.target.checked)
+                    }
+                  />
+                </label>
+
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Icon
+                      icon="ph:push-pin"
+                      className="size-4 text-base-content/50"
+                    />
+                    <span>Ventana siempre arriba</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-xs toggle-primary"
+                    checked={settings.alwaysOnTop}
+                    onChange={(e) =>
+                      updateSetting("alwaysOnTop", e.target.checked)
+                    }
+                  />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "shortcuts" && (
+            <div className="flex flex-col gap-3">
               <label className="flex items-center justify-between cursor-pointer">
                 <div className="flex items-center gap-2 text-sm">
                   <Icon
-                    icon="ph:push-pin"
+                    icon="ph:keyboard"
                     className="size-4 text-base-content/50"
                   />
-                  <span>Ventana siempre arriba</span>
+                  <span>Atajos globales (teclado)</span>
                 </div>
                 <input
                   type="checkbox"
                   className="toggle toggle-xs toggle-primary"
-                  checked={settings.alwaysOnTop}
+                  checked={settings.globalShortcuts}
                   onChange={(e) =>
-                    updateSetting("alwaysOnTop", e.target.checked)
+                    updateSetting("globalShortcuts", e.target.checked)
                   }
                 />
               </label>
+
+              <div className="overflow-x-auto border border-base-content/10 rounded-lg">
+                <table className="table table-xs w-full">
+                  <thead>
+                    <tr className="text-base-content/60">
+                      <th>Atajo</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-xs">
+                    <tr>
+                      <td className="whitespace-nowrap">
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">Espacio</kbd>
+                      </td>
+                      <td>Enfocar app y pegar portapapeles</td>
+                    </tr>
+                    <tr>
+                      <td className="whitespace-nowrap">
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F9</kbd>
+                      </td>
+                      <td>Ping a IP/Host del portapapeles</td>
+                    </tr>
+                    <tr>
+                      <td className="whitespace-nowrap">
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F10</kbd>
+                      </td>
+                      <td>Ping a Router (.250)</td>
+                    </tr>
+                    <tr>
+                      <td className="whitespace-nowrap">
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F11</kbd>
+                      </td>
+                      <td>Ejecutar net time</td>
+                    </tr>
+                    <tr>
+                      <td className="whitespace-nowrap">
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F12</kbd>
+                      </td>
+                      <td>Asistencia remota (msra)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="modal-action mt-4">
             <button
@@ -242,3 +328,4 @@ export function SettingsModal() {
     </>
   );
 }
+

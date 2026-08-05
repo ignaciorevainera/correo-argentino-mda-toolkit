@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, MouseEvent } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 interface TitleBarProps {
@@ -23,13 +23,19 @@ export default function TitleBar({
     }
   };
 
+  const handleMouseDown = (e: MouseEvent) => {
+    if (e.button === 0 && e.detail === 1) {
+      getCurrentWindow().startDragging();
+    }
+  };
+
   return (
     <div
-      data-tauri-drag-region
+      onMouseDown={handleMouseDown}
       className="h-8 flex items-center justify-between bg-base-200 text-base-content select-none shrink-0 px-2 rounded-t-lg"
     >
-      <div data-tauri-drag-region className="flex items-center gap-2 min-w-0 pointer-events-none">
-        <span data-tauri-drag-region className="text-xs font-bold font-sans text-secondary truncate pl-1">
+      <div className="flex items-center gap-2 min-w-0 pointer-events-none">
+        <span className="text-xs font-bold font-sans text-secondary truncate pl-1">
           {title}
         </span>
       </div>
