@@ -79,12 +79,14 @@
 
 /* Density Adjustments */
 html[data-density="compact"] {
-  --size-field: 0.15rem;
-  --size-selector: 0.15rem;
-  font-size: 14px;
+  --size-field: 0.25rem;
+  --size-selector: 0.25rem;
+  font-size: 16px;
 }
 
 html[data-density="normal"] {
+  --size-field: 0.375rem;
+  --size-selector: 0.375rem;
   font-size: 16px;
 }
 
@@ -94,7 +96,7 @@ html[data-text-size="large"] {
 }
 
 html[data-density="compact"][data-text-size="large"] {
-  font-size: 16px;
+  font-size: 18px;
 }
 
 html[data-text-size="small"] {
@@ -102,7 +104,7 @@ html[data-text-size="small"] {
 }
 
 html[data-density="compact"][data-text-size="small"] {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 /* Reduced Motion */
@@ -117,6 +119,19 @@ html[data-reduced-motion="true"] *::after {
 
 *[data-tauri-drag-region] {
   app-region: drag;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 

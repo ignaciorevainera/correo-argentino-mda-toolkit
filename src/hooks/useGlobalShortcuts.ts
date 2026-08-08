@@ -30,27 +30,34 @@ export function useGlobalShortcuts(
         try {
           await register(shortcut, async (event) => {
             if (event.state === "Pressed") {
-              let clipboardText = "";
-              try {
-                clipboardText = (await readText()) || "";
-              } catch {
-                clipboardText = "";
-              }
+              console.log(`[GlobalShortcut] Triggered ${shortcut}`);
               try {
                 const win = getCurrentWindow();
                 await win.show();
                 await win.unminimize();
                 await win.setFocus();
-              } catch {}
+              } catch (err) {
+                console.error("[GlobalShortcut] Error focusing window:", err);
+              }
+              let clipboardText = "";
+              try {
+                clipboardText = (await readText()) || "";
+              } catch (err) {
+                console.error("[GlobalShortcut] Error reading clipboard:", err);
+                clipboardText = "";
+              }
               onShortcutRef.current(action, clipboardText);
             }
           });
+          console.log(`[GlobalShortcut] Registered ${shortcut}`);
           if (isMounted) {
             registeredShortcuts.push(shortcut);
           } else {
             await unregister(shortcut).catch(() => {});
           }
-        } catch {}
+        } catch (err) {
+          console.error(`[GlobalShortcut] Failed to register ${shortcut}:`, err);
+        }
       }
     };
 

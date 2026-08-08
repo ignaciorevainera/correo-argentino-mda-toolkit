@@ -14,9 +14,9 @@
       {
         "title": "Correo Argentino MDA Toolkit",
         "width": 360,
-        "height": 300,
+        "height": 440,
         "minWidth": 360,
-        "minHeight": 300,
+        "minHeight": 440,
         "resizable": false,
         "maximizable": false,
         "decorations": false

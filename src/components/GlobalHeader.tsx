@@ -21,7 +21,7 @@ export default function GlobalHeader({
           onChange={(e) => onHostnameChange(e.target.value)}
           onKeyDown={onKeyDown}
           placeholder="hostname o dirección IPv4"
-          className="input input-sm w-full font-mono text-xs"
+          className="input input-md w-full font-mono text-sm"
           autoComplete="off"
           autoFocus
         />

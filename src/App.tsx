@@ -103,23 +103,34 @@ function App() {
       try {
         await register("CommandOrControl+Space", async (event) => {
           if (event.state === "Pressed") {
-            const win = getCurrentWindow();
-            await win.show();
-            await win.unminimize();
-            await win.setFocus();
-            
-            const text = await readText();
-            if (text) {
-              setHostname(text);
-              document.getElementById("global-hostname")?.focus();
+            console.log("[Ctrl+Space] Triggered");
+            try {
+              const win = getCurrentWindow();
+              await win.show();
+              await win.unminimize();
+              await win.setFocus();
+            } catch (err) {
+              console.error("[Ctrl+Space] Focus error:", err);
+            }
+            try {
+              const text = await readText();
+              console.log("[Ctrl+Space] Clipboard text:", JSON.stringify(text));
+              const trimmed = (text || "").trim();
+              if (trimmed) {
+                setHostname(trimmed);
+                document.getElementById("global-hostname")?.focus();
+              }
+            } catch (err) {
+              console.error("[Ctrl+Space] Clipboard error:", err);
             }
           }
         });
+        console.log("[Ctrl+Space] Registered successfully");
         if (!active) {
           await unregister("CommandOrControl+Space");
         }
       } catch (err) {
-        console.error("Shortcut error:", err);
+        console.error("[Ctrl+Space] Registration FAILED:", err);
       }
     };
 
@@ -239,6 +250,15 @@ function App() {
   };
 
   const handleGlobalShortcut = async (action: string, clipboardText: string) => {
+    if (!clipboardText || clipboardText.trim() === "") {
+      showNotification({
+        title: "Portapapeles vacío",
+        message: "Copia una dirección IP o nombre de equipo primero.",
+        type: "error",
+      });
+      return;
+    }
+
     const classification = classifyIpInput(clipboardText);
 
     if (classification.kind === "invalid-ip") {
@@ -359,14 +379,14 @@ function App() {
           <button
             onClick={() => openWindow("ping")}
             disabled={!hostEnabled}
-            className="btn btn-primary btn-sm flex-1"
+            className="btn btn-primary btn-md flex-1"
           >
             ping
           </button>
           <button
             onClick={() => openWindow("ping-t")}
             disabled={!hostEnabled}
-            className="btn btn-primary btn-sm btn-outline shrink-0 px-2"
+            className="btn btn-primary btn-md btn-outline shrink-0 px-2"
             title="Ping continuo"
             aria-label="Ping continuo"
           >
@@ -377,14 +397,14 @@ function App() {
           <button
             onClick={() => openWindow("router")}
             disabled={!hostEnabled}
-            className="btn btn-secondary btn-sm flex-1"
+            className="btn btn-secondary btn-md flex-1"
           >
             ping .250
           </button>
           <button
             onClick={() => openWindow("router-t")}
             disabled={!hostEnabled}
-            className="btn btn-secondary btn-sm btn-outline shrink-0 px-2"
+            className="btn btn-secondary btn-md btn-outline shrink-0 px-2"
             title="Ping continuo"
             aria-label="Ping continuo"
           >
@@ -395,14 +415,14 @@ function App() {
           <button
             onClick={() => openWindow("server")}
             disabled={!hostEnabled}
-            className="btn btn-accent btn-sm flex-1"
+            className="btn btn-accent btn-md flex-1"
           >
             ping .231
           </button>
           <button
             onClick={() => openWindow("server-t")}
             disabled={!hostEnabled}
-            className="btn btn-accent btn-sm btn-outline shrink-0 px-2"
+            className="btn btn-accent btn-md btn-outline shrink-0 px-2"
             title="Ping continuo"
             aria-label="Ping continuo"
           >
@@ -411,14 +431,14 @@ function App() {
           <button
             onClick={() => openWindow("nslookup")}
             disabled={!hostEnabled}
-            className="btn btn-neutral btn-sm flex-1"
+            className="btn btn-neutral btn-md flex-1"
           >
             nslookup
           </button>
           <button
             onClick={() => openWindow("nettime")}
             disabled={!hostEnabled}
-            className="btn btn-neutral btn-sm flex-1"
+            className="btn btn-neutral btn-md flex-1"
           >
             net time
           </button>
@@ -427,14 +447,14 @@ function App() {
           <button
             onClick={launchMsra}
             disabled={!hostEnabled}
-            className="btn btn-info btn-sm flex-1"
+            className="btn btn-info btn-md flex-1"
           >
             msra
           </button>
           <button
             onClick={launchVnc}
             disabled={!hostEnabled}
-            className="btn btn-accent btn-sm flex-1"
+            className="btn btn-accent btn-md flex-1"
             title="UltraVNC a equipos Ubuntu/Debian (puerto 5901)"
             aria-label="UltraVNC Ubuntu/Debian"
           >
@@ -445,14 +465,14 @@ function App() {
           <button
             onClick={() => openWindow("ipconfig")}
             disabled={!hostEnabled}
-            className="btn btn-neutral btn-sm flex-1"
+            className="btn btn-neutral btn-md flex-1"
           >
             ipconfig
           </button>
           <button
             onClick={() => openWindow("tracert")}
             disabled={!hostEnabled}
-            className="btn btn-neutral btn-sm flex-1"
+            className="btn btn-neutral btn-md flex-1"
           >
             tracert
           </button>
@@ -470,13 +490,13 @@ function App() {
             }
           }}
           placeholder="usuario de red"
-          className="input input-sm w-full font-mono text-xs"
+          className="input input-md w-full font-mono text-sm"
           autoComplete="off"
         />
         <button
           onClick={() => openWindow("netuser")}
           disabled={!userEnabled}
-          className="btn btn-primary btn-sm shrink-0"
+          className="btn btn-primary btn-md shrink-0"
         >
           net user /do
         </button>

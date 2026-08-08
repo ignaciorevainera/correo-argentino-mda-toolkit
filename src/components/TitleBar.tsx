@@ -25,6 +25,8 @@ export default function TitleBar({
 
   const handleMouseDown = (e: MouseEvent) => {
     if (e.button === 0 && e.detail === 1) {
+      const target = e.target as HTMLElement;
+      if (target.closest('button')) return;
       getCurrentWindow().startDragging();
     }
   };

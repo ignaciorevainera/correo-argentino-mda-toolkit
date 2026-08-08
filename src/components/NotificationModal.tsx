@@ -56,7 +56,7 @@ export default function NotificationModal() {
           <h3 className="font-semibold text-sm flex-1">{notification.title}</h3>
         </div>
         <div className="px-5 py-3">
-          <p className="text-sm text-base-content/70 whitespace-pre-wrap break-all">
+          <p className="text-sm text-base-content/70 whitespace-pre-wrap break-words">
             {notification.message}
           </p>
         </div>

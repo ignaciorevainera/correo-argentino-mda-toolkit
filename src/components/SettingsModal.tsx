@@ -11,47 +11,20 @@ import {
 const THEMES = [
   { value: "mda", label: "Claro (MDA)" },
   { value: "mda-dark", label: "Oscuro (MDA)" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
   { value: "cupcake", label: "Cupcake" },
-  { value: "bumblebee", label: "Bumblebee" },
-  { value: "emerald", label: "Emerald" },
   { value: "corporate", label: "Corporate" },
   { value: "synthwave", label: "Synthwave" },
-  { value: "retro", label: "Retro" },
   { value: "cyberpunk", label: "Cyberpunk" },
   { value: "valentine", label: "Valentine" },
-  { value: "halloween", label: "Halloween" },
-  { value: "garden", label: "Garden" },
-  { value: "forest", label: "Forest" },
-  { value: "aqua", label: "Aqua" },
-  { value: "lofi", label: "Lofi" },
-  { value: "pastel", label: "Pastel" },
-  { value: "fantasy", label: "Fantasy" },
-  { value: "wireframe", label: "Wireframe" },
-  { value: "black", label: "Black" },
-  { value: "luxury", label: "Luxury" },
-  { value: "dracula", label: "Dracula" },
-  { value: "cmyk", label: "CMYK" },
-  { value: "autumn", label: "Autumn" },
-  { value: "business", label: "Business" },
-  { value: "acid", label: "Acid" },
-  { value: "lemonade", label: "Lemonade" },
-  { value: "night", label: "Night" },
-  { value: "coffee", label: "Coffee" },
-  { value: "winter", label: "Winter" },
-  { value: "dim", label: "Dim" },
-  { value: "nord", label: "Nord" },
-  { value: "sunset", label: "Sunset" },
-  { value: "caramellate", label: "Caramellate" },
-  { value: "abyss", label: "Abyss" },
 ] as const;
 
 const FONT_STEPS: FontSize[] = ["small", "normal", "large"];
 
 export function SettingsModal() {
   const [settings, setSettings] = useState<AppSettings>(getSettings());
-  const [activeTab, setActiveTab] = useState<"general" | "shortcuts">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "shortcuts">(
+    "general",
+  );
   const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -59,8 +32,7 @@ export function SettingsModal() {
       if (e.key === "app_settings" && e.newValue) {
         try {
           setSettings(JSON.parse(e.newValue));
-        } catch {
-        }
+        } catch {}
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -129,7 +101,7 @@ export function SettingsModal() {
               <div>
                 <p className="text-xs text-base-content/50 mb-1.5">Tema</p>
                 <select
-                  className="select select-bordered select-sm w-full max-w-xs"
+                  className="select select-bordered bg-base-200 select-sm w-full"
                   value={settings.theme}
                   onChange={(e) => updateSetting("theme", e.target.value)}
                 >
@@ -198,8 +170,12 @@ export function SettingsModal() {
                   <span className="text-[10px] text-base-content/40">
                     Pequeño
                   </span>
-                  <span className="text-[10px] text-base-content/40">Normal</span>
-                  <span className="text-[10px] text-base-content/40">Grande</span>
+                  <span className="text-[10px] text-base-content/40">
+                    Normal
+                  </span>
+                  <span className="text-[10px] text-base-content/40">
+                    Grande
+                  </span>
                 </div>
               </div>
 
@@ -274,31 +250,36 @@ export function SettingsModal() {
                   <tbody className="text-xs">
                     <tr>
                       <td className="whitespace-nowrap">
-                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">Espacio</kbd>
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+
+                        <kbd className="kbd kbd-xs">Espacio</kbd>
                       </td>
                       <td>Enfocar app y pegar portapapeles</td>
                     </tr>
                     <tr>
                       <td className="whitespace-nowrap">
-                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F9</kbd>
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+
+                        <kbd className="kbd kbd-xs">F9</kbd>
                       </td>
                       <td>Ping a IP/Host del portapapeles</td>
                     </tr>
                     <tr>
                       <td className="whitespace-nowrap">
-                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F10</kbd>
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+
+                        <kbd className="kbd kbd-xs">F10</kbd>
                       </td>
                       <td>Ping a Router (.250)</td>
                     </tr>
                     <tr>
                       <td className="whitespace-nowrap">
-                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F11</kbd>
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+
+                        <kbd className="kbd kbd-xs">F11</kbd>
                       </td>
                       <td>Ejecutar net time</td>
                     </tr>
                     <tr>
                       <td className="whitespace-nowrap">
-                        <kbd className="kbd kbd-xs">Ctrl</kbd>+<kbd className="kbd kbd-xs">F12</kbd>
+                        <kbd className="kbd kbd-xs">Ctrl</kbd>+
+                        <kbd className="kbd kbd-xs">F12</kbd>
                       </td>
                       <td>Asistencia remota (msra)</td>
                     </tr>
@@ -328,4 +309,3 @@ export function SettingsModal() {
     </>
   );
 }
-
