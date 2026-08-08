@@ -87,6 +87,45 @@ async fn stream_output<R: tokio::io::AsyncRead + Unpin>(
     }
 }
 
+fn get_vpn_source_ip() -> Option<String> {
+    let output = StdCommand::new("ipconfig")
+        .creation_flags(CREATE_NO_WINDOW)
+        .output()
+        .ok()?;
+    let text = decode_windows_output(output.stdout);
+
+    let mut is_vpn = false;
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if line.contains("Adaptador") || line.contains("adapter") {
+            let lower = line.to_lowercase();
+            is_vpn = lower.contains("check point") || lower.contains("vpn");
+        }
+        if is_vpn && (trimmed.contains("IPv4") || trimmed.contains("Dirección IPv4")) {
+            if let Some(pos) = trimmed.rfind(':') {
+                let ip = trimmed[pos + 1..].trim();
+                let ip_clean: String = ip.chars().filter(|c| c.is_ascii_digit() || *c == '.').collect();
+                if !ip_clean.is_empty() && ip_clean != "0.0.0.0" {
+                    return Some(ip_clean);
+                }
+            }
+        }
+    }
+    None
+}
+
+fn inject_vpn_source_ip(command: &str) -> String {
+    let trimmed = command.trim();
+    if (trimmed.starts_with("ping ") || trimmed == "ping") && !trimmed.contains(" -S ") {
+        if let Some(vpn_ip) = get_vpn_source_ip() {
+            if trimmed.starts_with("ping ") {
+                return format!("ping -S {} {}", vpn_ip, &trimmed[5..]);
+            }
+        }
+    }
+    command.to_string()
+}
+
 #[tauri::command]
 async fn run_command_stream(
     window: tauri::Window,
@@ -94,7 +133,8 @@ async fn run_command_stream(
     id: String,
     command: String,
 ) -> Result<(), String> {
-    let mut child = spawn_cmd(&command).map_err(|e| format!("Failed to spawn: {}", e))?;
+    let final_command = inject_vpn_source_ip(&command);
+    let mut child = spawn_cmd(&final_command).map_err(|e| format!("Failed to spawn: {}", e))?;
 
     if let Some(pid) = child.id() {
         state.lock().unwrap().insert(id.clone(), pid);
@@ -326,6 +366,17 @@ mod tests {
         assert_eq!(args[0], "192.168.1.10::5901");
         assert_eq!(args[1], "-password");
         assert!(!args[2].is_empty());
+    }
+
+    #[test]
+    fn inject_vpn_source_ip_leaves_non_ping_commands() {
+        assert_eq!(inject_vpn_source_ip("nslookup host.correo.local"), "nslookup host.correo.local");
+        assert_eq!(inject_vpn_source_ip("net time \\\\host"), "net time \\\\host");
+    }
+
+    #[test]
+    fn inject_vpn_source_ip_preserves_existing_s_flag() {
+        assert_eq!(inject_vpn_source_ip("ping -S 10.0.0.1 10.0.0.2"), "ping -S 10.0.0.1 10.0.0.2");
     }
 }
 
