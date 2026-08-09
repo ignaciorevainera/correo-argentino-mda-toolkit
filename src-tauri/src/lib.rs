@@ -199,9 +199,12 @@ async fn stop_command_stream(
 
 #[tauri::command]
 fn run_msra_offer(hostname: String) -> Result<(), String> {
-    StdCommand::new("msra.exe")
+    StdCommand::new("powershell")
         .creation_flags(CREATE_NO_WINDOW)
-        .args(["/offerRA", &hostname])
+        .args([
+            "-Command",
+            &format!("Start-Process msra.exe -ArgumentList '/offerRA {}' -Verb RunAs", hostname),
+        ])
         .spawn()
         .map_err(|e| format!("Failed to launch Remote Assistance: {}", e))?;
     Ok(())
