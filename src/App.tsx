@@ -53,17 +53,17 @@ type ActionType = "ping" | "router" | "server" | "ping-t" | "router-t" | "server
 function actionConfig(type: ActionType, hostname: string, username: string) {
   switch (type) {
     case "ping":
-      return { type: "ping" as const, title: `Ping — ${hostname}`, command: `ping -n 4 ${hostname}` };
+      return { type: "text" as const, title: `Ping — ${hostname}`, command: `ping -n 4 ${hostname}` };
     case "router":
-      return { type: "ping" as const, title: `Ping Router — ${routerIp(hostname)}`, command: `ping -n 4 ${routerIp(hostname)}` };
+      return { type: "text" as const, title: `Ping Router — ${routerIp(hostname)}`, command: `ping -n 4 ${routerIp(hostname)}` };
     case "server":
-      return { type: "ping" as const, title: `Ping Servidor — ${serverIp(hostname)}`, command: `ping -n 4 ${serverIp(hostname)}` };
+      return { type: "text" as const, title: `Ping Servidor — ${serverIp(hostname)}`, command: `ping -n 4 ${serverIp(hostname)}` };
     case "ping-t":
-      return { type: "ping" as const, title: `Ping continuo — ${hostname}`, command: `ping -t ${hostname}` };
+      return { type: "text" as const, title: `Ping continuo — ${hostname}`, command: `ping -t ${hostname}` };
     case "router-t":
-      return { type: "ping" as const, title: `Ping continuo Router — ${routerIp(hostname)}`, command: `ping -t ${routerIp(hostname)}` };
+      return { type: "text" as const, title: `Ping continuo Router — ${routerIp(hostname)}`, command: `ping -t ${routerIp(hostname)}` };
     case "server-t":
-      return { type: "ping" as const, title: `Ping continuo Servidor — ${serverIp(hostname)}`, command: `ping -t ${serverIp(hostname)}` };
+      return { type: "text" as const, title: `Ping continuo Servidor — ${serverIp(hostname)}`, command: `ping -t ${serverIp(hostname)}` };
     case "nslookup":
       return { type: "text" as const, title: `nslookup — ${hostname}`, command: `nslookup ${hostname}` };
     case "nettime":
